@@ -15,12 +15,15 @@ var usage = `Usage:
 `
 
 var accountIndexFlag, countFlag uint
+var noReceiveFlag, noConfirmFlag bool
 
 func init() {
 	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	flag.UintVar(&accountIndexFlag, "a", 0, "")
 	flag.UintVar(&accountIndexFlag, "account-index", 0, "")
 	flag.UintVar(&countFlag, "n", 0, "")
+	flag.BoolVar(&noReceiveFlag, "no-receive", false, "")
+	flag.BoolVar(&noConfirmFlag, "no-confirm", false, "")
 	flag.Parse()
 	if err := verifyLegalUsage(); err != nil {
 		flag.Usage()
@@ -46,6 +49,7 @@ func main() {
 		err = printAddresses()
 	case "r":
 	case "b":
+		err = printBalance()
 	case "s":
 	}
 	if err != nil {

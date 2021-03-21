@@ -46,3 +46,8 @@ func revertBytes(in []byte) []byte {
 	}
 	return in
 }
+
+func getNodeUrl() string {
+	// TODO: Random from list?!
+	return "https://mynano.ninja/api/node"
+}
