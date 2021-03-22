@@ -3,7 +3,10 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"math/big"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -45,6 +48,20 @@ func revertBytes(in []byte) []byte {
 		in[i], in[len(in)-1-i] = in[len(in)-1-i], in[i]
 	}
 	return in
+}
+
+func doRPC(requestBody string) (responseBytes []byte, err error) {
+	url := getNodeUrl()
+	resp, err := http.Post(url, "application/json", strings.NewReader(requestBody))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		err = fmt.Errorf("received unexpected HTTP return code %d", resp.StatusCode)
+		return
+	}
+	return ioutil.ReadAll(resp.Body)
 }
 
 func getNodeUrl() string {

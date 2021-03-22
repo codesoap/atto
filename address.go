@@ -32,7 +32,8 @@ func printAddresses() error {
 }
 
 func printAddress(seed *big.Int, index uint32) error {
-	address, err := getAddress(seed, index)
+	privateKey := getPrivateKey(seed, index)
+	address, err := getAddress(privateKey)
 	if err != nil {
 		return err
 	}
@@ -40,8 +41,7 @@ func printAddress(seed *big.Int, index uint32) error {
 	return nil
 }
 
-func getAddress(seed *big.Int, index uint32) (string, error) {
-	privateKey := getPrivateKey(seed, index)
+func getAddress(privateKey *big.Int) (string, error) {
 	publicKey := derivePublicKey(privateKey)
 	base32PublicKey := base32Encode(publicKey)
 
