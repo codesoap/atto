@@ -22,24 +22,29 @@ type accountInfo struct {
 }
 
 type pending struct {
-	Error  string `json:"error"`
-	Blocks blocks `json:"blocks"`
+	Error  string        `json:"error"`
+	Blocks pendingBlocks `json:"blocks"`
 }
 
-type blocks []string
+type pendingBlocks map[string]pendingBlockSource
 
 // UnmarshalJSON just unmarshals a list of strings, but
 // interprets an empty string as an empty list. This is
 // neccessary due to a bug in the Nano node implementation. See
 // https://github.com/nanocurrency/nano-node/issues/3161.
-func (b *blocks) UnmarshalJSON(in []byte) error {
+func (b *pendingBlocks) UnmarshalJSON(in []byte) error {
 	if string(in) == `""` {
 		return nil
 	}
-	var raw []string
+	var raw map[string]pendingBlockSource
 	err := json.Unmarshal(in, &raw)
-	*b = blocks(raw)
+	*b = pendingBlocks(raw)
 	return err
+}
+
+type pendingBlockSource struct {
+	Amount string `json:"amount"`
+	Source string `json:"source"`
 }
 
 func printBalance() error {
@@ -63,13 +68,11 @@ func printBalance() error {
 	if err != nil {
 		return err
 	}
-	balanceRaw, ok := big.NewInt(0).SetString(info.Balance, 10)
-	if !ok {
-		return fmt.Errorf("invalid balance '%s' received", info.Balance)
+	balance, err := rawToNano(info.Balance)
+	if err != nil {
+		return err
 	}
-	rawPerKnano, _ := big.NewInt(0).SetString("1000000000000000000000000000", 10)
-	balance := balanceRaw.Div(balanceRaw, rawPerKnano).Uint64()
-	fmt.Printf("%d.%03d NANO\n", balance/1000, balance%1000)
+	fmt.Println(balance)
 	return nil
 }
 
@@ -82,9 +85,14 @@ func receivePendingSends(privateKey *big.Int) error {
 	if err != nil {
 		return err
 	}
-	for _, send := range sends {
-		fmt.Fprintf(os.Stderr, "Receiving funds from %s... ", send)
-		err = receiveSend(send, privateKey)
+	for blockHash, source := range sends {
+		amount, err := rawToNano(source.Amount)
+		if err != nil {
+			return err
+		}
+		txt := "Initiating receival of %s from %s... "
+		fmt.Fprintf(os.Stderr, txt, amount, source.Source)
+		err = receiveSend(blockHash, source, privateKey)
 		if err != nil {
 			return err
 		}
@@ -93,8 +101,13 @@ func receivePendingSends(privateKey *big.Int) error {
 	return nil
 }
 
-func getPendingSends(address string) (sends []string, err error) {
-	requestBody := fmt.Sprintf(`{"action": "pending", "account": "%s"}`, address)
+func getPendingSends(address string) (sends pendingBlocks, err error) {
+	requestBody := fmt.Sprintf(`{`+
+		`"action": "pending", `+
+		`"account": "%s", `+
+		`"include_only_confirmed": "true", `+
+		`"source": "true"`+
+		`}`, address)
 	responseBytes, err := doRPC(requestBody)
 	if err != nil {
 		return
@@ -109,7 +122,7 @@ func getPendingSends(address string) (sends []string, err error) {
 	return pending.Blocks, err
 }
 
-func receiveSend(blockId string, privateKey *big.Int) error {
+func receiveSend(blockHash string, source pendingBlockSource, privateKey *big.Int) error {
 	return nil
 }
 

@@ -68,3 +68,13 @@ func getNodeUrl() string {
 	// TODO: Random from list?!
 	return "https://mynano.ninja/api/node"
 }
+
+func rawToNano(raw string) (string, error) {
+	balanceRaw, ok := big.NewInt(0).SetString(raw, 10)
+	if !ok {
+		return "", fmt.Errorf("invalid raw amount '%s'", raw)
+	}
+	rawPerKnano, _ := big.NewInt(0).SetString("1000000000000000000000000000", 10)
+	balance := balanceRaw.Div(balanceRaw, rawPerKnano).Uint64()
+	return fmt.Sprintf("%d.%03d NANO", balance/1000, balance%1000), nil
+}
