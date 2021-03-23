@@ -35,6 +35,6 @@ Usage:
 	atto n[ew]
 	atto [(-n COUNT|-a ACCOUNT_INDEX)] a[ddress]
 	atto [--account-index ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
-	atto [--account-index ACCOUNT_INDEX] [--no-receive] b[alance]
+	atto [--account-index ACCOUNT_INDEX] b[alance]
 	atto [--account-index ACCOUNT_INDEX] [--no-confirm] s[end] AMOUNT RECEIVER
 ```

@@ -10,19 +10,18 @@ var usage = `Usage:
 	atto n[ew]
 	atto [--account-index ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
 	atto [(-n COUNT|-a ACCOUNT_INDEX)] a[ddress]
-	atto [--account-index ACCOUNT_INDEX] [--no-receive] b[alance]
+	atto [--account-index ACCOUNT_INDEX] b[alance]
 	atto [--account-index ACCOUNT_INDEX] [--no-confirm] s[end] RECEIVER
 `
 
 var accountIndexFlag, countFlag uint
-var noReceiveFlag, noConfirmFlag bool
+var noConfirmFlag bool
 
 func init() {
 	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	flag.UintVar(&accountIndexFlag, "a", 0, "")
 	flag.UintVar(&accountIndexFlag, "account-index", 0, "")
 	flag.UintVar(&countFlag, "n", 0, "")
-	flag.BoolVar(&noReceiveFlag, "no-receive", false, "")
 	flag.BoolVar(&noConfirmFlag, "no-confirm", false, "")
 	flag.Parse()
 	if err := verifyLegalUsage(); err != nil {

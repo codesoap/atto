@@ -7,18 +7,11 @@ import (
 	"os"
 )
 
-// TODO: Remove unused fields.
 type accountInfo struct {
 	Error                      string `json:"error"`
 	Frontier                   string `json:"frontier"`
-	OpenBlock                  string `json:"open_block"`
 	RepresentativeBlock        string `json:"representative_block"`
 	Balance                    string `json:"balance"`
-	ModifiedTimestamp          string `json:"modified_timestamp"`
-	BlockCount                 string `json:"block_count"`
-	ConfirmationHeight         string `json:"confirmation_height"`
-	ConfirmationHeightFrontier string `json:"confirmation_height_frontier"`
-	AccountVersion             string `json:"account_version"`
 }
 
 type pending struct {
@@ -58,47 +51,49 @@ func printBalance() error {
 		return err
 	}
 
-	if !noReceiveFlag {
-		if err = receivePendingSends(privateKey); err != nil {
-			return err
-		}
-	}
-
 	info, err := getAccountInfo(address)
 	if err != nil {
 		return err
 	}
-	balance, err := rawToNano(info.Balance)
+	receivedAmount, err := receivePendingSends(info.Frontier, privateKey)
 	if err != nil {
 		return err
 	}
-	fmt.Println(balance)
+	balance, ok := big.NewInt(0).SetString(info.Balance, 10)
+	if !ok {
+		return fmt.Errorf("cannot parse '%s' as an integer", info.Balance)
+	}
+	balance = big.NewInt(0).Add(balance, receivedAmount)
+	fmt.Println(rawToNanoString(balance))
 	return nil
 }
 
-func receivePendingSends(privateKey *big.Int) error {
+func receivePendingSends(frontier string, privateKey *big.Int) (receivedAmount *big.Int, err error) {
+	receivedAmount = big.NewInt(0)
 	address, err := getAddress(privateKey)
 	if err != nil {
-		return err
+		return
 	}
 	sends, err := getPendingSends(address)
 	if err != nil {
-		return err
+		return
 	}
 	for blockHash, source := range sends {
-		amount, err := rawToNano(source.Amount)
-		if err != nil {
-			return err
+		amount, ok := big.NewInt(0).SetString(source.Amount, 10)
+		if !ok {
+			err = fmt.Errorf("cannot parse '%s' as an integer", source.Amount)
+			return
 		}
+		receivedAmount = big.NewInt(0).Add(receivedAmount, amount)
 		txt := "Initiating receival of %s from %s... "
-		fmt.Fprintf(os.Stderr, txt, amount, source.Source)
+		fmt.Fprintf(os.Stderr, txt, rawToNanoString(amount), source.Source)
 		err = receiveSend(blockHash, source, privateKey)
 		if err != nil {
-			return err
+			return
 		}
 		fmt.Fprintln(os.Stderr, "done")
 	}
-	return nil
+	return
 }
 
 func getPendingSends(address string) (sends pendingBlocks, err error) {
