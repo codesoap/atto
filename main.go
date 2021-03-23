@@ -8,21 +8,19 @@ import (
 
 var usage = `Usage:
 	atto n[ew]
-	atto [--account-index ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
-	atto [(-n COUNT|-a ACCOUNT_INDEX)] a[ddress]
-	atto [--account-index ACCOUNT_INDEX] b[alance]
-	atto [--account-index ACCOUNT_INDEX] [--no-confirm] s[end] RECEIVER
+	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
+	atto [-a ACCOUNT_INDEX] a[ddress]
+	atto [-a ACCOUNT_INDEX] b[alance]
+	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
 `
 
-var accountIndexFlag, countFlag uint
-var noConfirmFlag bool
+var accountIndexFlag uint
+var yFlag bool
 
 func init() {
 	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	flag.UintVar(&accountIndexFlag, "a", 0, "")
-	flag.UintVar(&accountIndexFlag, "account-index", 0, "")
-	flag.UintVar(&countFlag, "n", 0, "")
-	flag.BoolVar(&noConfirmFlag, "no-confirm", false, "")
+	flag.BoolVar(&yFlag, "y", false, "")
 	flag.Parse()
 	if err := verifyLegalUsage(); err != nil {
 		flag.Usage()
@@ -35,7 +33,6 @@ func verifyLegalUsage() error {
 	// flags.NArgs OK.
 	// Subcommand exists.
 	// Index positive
-	// Count positive
 	return nil // TODO
 }
 
@@ -45,7 +42,7 @@ func main() {
 	case "n":
 		err = printNewSeed()
 	case "a":
-		err = printAddresses()
+		err = printAddress()
 	case "r":
 	case "b":
 		err = printBalance()

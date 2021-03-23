@@ -33,8 +33,8 @@ Send 0.1 NANO to nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomn
 $ atto -h
 Usage:
 	atto n[ew]
-	atto [(-n COUNT|-a ACCOUNT_INDEX)] a[ddress]
-	atto [--account-index ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
-	atto [--account-index ACCOUNT_INDEX] b[alance]
-	atto [--account-index ACCOUNT_INDEX] [--no-confirm] s[end] AMOUNT RECEIVER
+	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
+	atto [-a ACCOUNT_INDEX] a[ddress]
+	atto [-a ACCOUNT_INDEX] b[alance]
+	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
 ```

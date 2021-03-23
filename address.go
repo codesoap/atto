@@ -9,35 +9,17 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-func printAddresses() error {
+func printAddress() error {
 	seed, err := getSeed()
 	if err != nil {
 		return err
 	}
-	if countFlag < 1 {
-		err := printAddress(seed, uint32(accountIndexFlag))
-		if err != nil {
-			return err
-		}
-	} else {
-		var i uint
-		for i = 0; i < countFlag; i++ {
-			err := printAddress(seed, uint32(i))
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func printAddress(seed *big.Int, index uint32) error {
-	privateKey := getPrivateKey(seed, index)
+	privateKey := getPrivateKey(seed, uint32(accountIndexFlag))
 	address, err := getAddress(privateKey)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%3d: %s\n", index, address)
+	fmt.Println(address)
 	return nil
 }
 
