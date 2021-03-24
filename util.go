@@ -51,8 +51,7 @@ func revertBytes(in []byte) []byte {
 }
 
 func doRPC(requestBody string) (responseBytes []byte, err error) {
-	url := getNodeUrl()
-	resp, err := http.Post(url, "application/json", strings.NewReader(requestBody))
+	resp, err := http.Post(nodeUrl, "application/json", strings.NewReader(requestBody))
 	if err != nil {
 		return
 	}
@@ -62,11 +61,6 @@ func doRPC(requestBody string) (responseBytes []byte, err error) {
 		return
 	}
 	return ioutil.ReadAll(resp.Body)
-}
-
-func getNodeUrl() string {
-	// TODO: Random from list?!
-	return "https://mynano.ninja/api/node"
 }
 
 func rawToNanoString(raw *big.Int) string {

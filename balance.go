@@ -99,15 +99,17 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 			LinkAsAccount:  source.Source,
 		}
 		block.sign(privateKey)
-		block.addWork(smallWorkThreshold)
+		block.addWork(receiveWorkThreshold)
 		process := process{
 			Action:    "process",
 			JsonBlock: "true",
 			Subtype:   "receive",
 			Block:     block,
 		}
+		// TODO: Send block to network
 
 		fmt.Fprintln(os.Stderr, "done")
+		previousBlock = reivedBlockHash
 	}
 	return
 }
@@ -143,10 +145,16 @@ func getAccountInfo(address string) (info accountInfo, err error) {
 	if err != nil {
 		return
 	}
-	err = json.Unmarshal(responseBytes, &info)
+	if err = json.Unmarshal(responseBytes, &info); err != nil {
+		return
+	}
 	// Need to check info.Error because of
 	// https://github.com/nanocurrency/nano-node/issues/1782.
-	if err == nil && info.Error != "" {
+	if info.Error == "Account not found" {
+		info.Frontier = "0000000000000000000000000000000000000000000000000000000000000000"
+		info.Representative = defaultRepresentative
+		info.Balance = "0"
+	} else if info.Error != "" {
 		err = fmt.Errorf("could not fetch balance: %s", info.Error)
 	}
 	return
