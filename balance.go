@@ -8,10 +8,10 @@ import (
 )
 
 type accountInfo struct {
-	Error                      string `json:"error"`
-	Frontier                   string `json:"frontier"`
-	RepresentativeBlock        string `json:"representative_block"`
-	Balance                    string `json:"balance"`
+	Error          string `json:"error"`
+	Frontier       string `json:"frontier"`
+	Representative string `json:"representative"`
+	Balance        string `json:"balance"`
 }
 
 type pending struct {
@@ -55,22 +55,22 @@ func printBalance() error {
 	if err != nil {
 		return err
 	}
-	receivedAmount, err := receivePendingSends(info.Frontier, privateKey)
+	updatedBalance, err := receivePendingSends(info, privateKey)
 	if err != nil {
 		return err
 	}
-	balance, ok := big.NewInt(0).SetString(info.Balance, 10)
-	if !ok {
-		return fmt.Errorf("cannot parse '%s' as an integer", info.Balance)
-	}
-	balance = big.NewInt(0).Add(balance, receivedAmount)
-	fmt.Println(rawToNanoString(balance))
+	fmt.Println(rawToNanoString(updatedBalance))
 	return nil
 }
 
-func receivePendingSends(frontier string, privateKey *big.Int) (receivedAmount *big.Int, err error) {
-	receivedAmount = big.NewInt(0)
+func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance *big.Int, err error) {
+	updatedBalance, ok := big.NewInt(0).SetString(info.Balance, 10)
+	if !ok {
+		err = fmt.Errorf("cannot parse '%s' as an integer", info.Balance)
+		return
+	}
 	address, err := getAddress(privateKey)
+	address = "nano_1111111111111111111111111111111111111111111111111117353trpda" // TODO: Just a test
 	if err != nil {
 		return
 	}
@@ -78,19 +78,35 @@ func receivePendingSends(frontier string, privateKey *big.Int) (receivedAmount *
 	if err != nil {
 		return
 	}
+	previousBlock := info.Frontier
 	for blockHash, source := range sends {
 		amount, ok := big.NewInt(0).SetString(source.Amount, 10)
 		if !ok {
 			err = fmt.Errorf("cannot parse '%s' as an integer", source.Amount)
 			return
 		}
-		receivedAmount = big.NewInt(0).Add(receivedAmount, amount)
+		updatedBalance = updatedBalance.Add(updatedBalance, amount)
 		txt := "Initiating receival of %s from %s... "
 		fmt.Fprintf(os.Stderr, txt, rawToNanoString(amount), source.Source)
-		err = receiveSend(blockHash, source, privateKey)
-		if err != nil {
-			return
+
+		block := block{
+			Type:           "state",
+			Account:        address,
+			Previous:       previousBlock,
+			Representative: info.Representative,
+			Balance:        updatedBalance.String(),
+			Link:           blockHash,
+			LinkAsAccount:  source.Source,
 		}
+		block.sign(privateKey)
+		block.addWork(smallWorkThreshold)
+		process := process{
+			Action:    "process",
+			JsonBlock: "true",
+			Subtype:   "receive",
+			Block:     block,
+		}
+
 		fmt.Fprintln(os.Stderr, "done")
 	}
 	return
@@ -117,12 +133,12 @@ func getPendingSends(address string) (sends pendingBlocks, err error) {
 	return pending.Blocks, err
 }
 
-func receiveSend(blockHash string, source pendingBlockSource, privateKey *big.Int) error {
-	return nil
-}
-
 func getAccountInfo(address string) (info accountInfo, err error) {
-	requestBody := fmt.Sprintf(`{"action": "account_info", "account": "%s"}`, address)
+	requestBody := fmt.Sprintf(`{`+
+		`"action": "account_info",`+
+		`"account": "%s",`+
+		`"representative": "true"`+
+		`}`, address)
 	responseBytes, err := doRPC(requestBody)
 	if err != nil {
 		return
