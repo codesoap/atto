@@ -6,4 +6,5 @@ var (
 	sendWorkThreshold     uint64 = 0xfffffff800000000
 	changeWorkThreshold   uint64 = 0xfffffff800000000
 	receiveWorkThreshold  uint64 = 0xfffffe0000000000
+	workerRoutines               = 512
 )

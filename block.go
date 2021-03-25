@@ -28,6 +28,11 @@ type block struct {
 	Work           string `json:"work"`
 }
 
+type workerResult struct {
+	hashNumber uint64
+	nonce      uint64
+}
+
 func (b *block) sign(privateKey *big.Int) {
 	// TODO
 }
@@ -53,24 +58,45 @@ func (b *block) addWork(workThreshold uint64, privateKey *big.Int) (err error) {
 }
 
 func findNonce(workThreshold uint64, suffix []byte) (uint64, error) {
-	var nonce uint64 = 0
+	results := make(chan workerResult)
+	quit := make(chan bool, workerRoutines)
+	for i := 0; i < workerRoutines; i++ {
+		go calculateHashes(suffix, uint64(i), results, quit)
+	}
+	for {
+		result := <-results
+		if result.hashNumber >= workThreshold {
+			for i := 0; i < workerRoutines; i++ {
+				quit <- true
+			}
+			return result.nonce, nil
+		}
+	}
+}
+
+func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, quit chan bool) {
 	nonceBytes := make([]byte, 8)
 	hasher, err := blake2b.New(8, nil)
 	if err != nil {
-		return nonce, err
+		panic(err) // Kinda cheap, but will likely never happen.
 	}
 	for {
-		binary.BigEndian.PutUint64(nonceBytes, nonce)
-		_, err := hasher.Write(append(nonceBytes, suffix...))
-		if err != nil {
-			return nonce, err
+		select {
+		case <-quit:
+			return
+		default:
+			binary.BigEndian.PutUint64(nonceBytes, nonce)
+			_, err := hasher.Write(append(nonceBytes, suffix...))
+			if err != nil {
+				panic(err) // Kinda cheap, but will likely never happen.
+			}
+			hashBytes := hasher.Sum(nil)
+			results <- workerResult{
+				hashNumber: binary.BigEndian.Uint64(hashBytes),
+				nonce:      nonce,
+			}
+			hasher.Reset()
+			nonce += uint64(workerRoutines)
 		}
-		hashBytes := hasher.Sum(nil)
-		hashNumber := binary.BigEndian.Uint64(hashBytes)
-		if hashNumber >= workThreshold {
-			return nonce, nil
-		}
-		hasher.Reset()
-		nonce++
 	}
 }
