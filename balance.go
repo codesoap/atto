@@ -23,7 +23,7 @@ type pendingBlocks map[string]pendingBlockSource
 
 // UnmarshalJSON just unmarshals a list of strings, but
 // interprets an empty string as an empty list. This is
-// neccessary due to a bug in the Nano node implementation. See
+// necessary due to a bug in the Nano node implementation. See
 // https://github.com/nanocurrency/nano-node/issues/3161.
 func (b *pendingBlocks) UnmarshalJSON(in []byte) error {
 	if string(in) == `""` {
@@ -99,17 +99,19 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 			LinkAsAccount:  source.Source,
 		}
 		block.sign(privateKey)
-		block.addWork(receiveWorkThreshold)
-		process := process{
-			Action:    "process",
-			JsonBlock: "true",
-			Subtype:   "receive",
-			Block:     block,
+		if err = block.addWork(receiveWorkThreshold, privateKey); err != nil {
+			return
 		}
+		// process := process{
+		// 	Action:    "process",
+		// 	JsonBlock: "true",
+		// 	Subtype:   "receive",
+		// 	Block:     block,
+		// }
 		// TODO: Send block to network
 
 		fmt.Fprintln(os.Stderr, "done")
-		previousBlock = reivedBlockHash
+		//previousBlock = reivedBlockHash
 	}
 	return
 }
