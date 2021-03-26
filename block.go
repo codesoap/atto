@@ -60,25 +60,34 @@ func (b *block) addWork(workThreshold uint64, privateKey *big.Int) (err error) {
 func findNonce(workThreshold uint64, suffix []byte) (uint64, error) {
 	results := make(chan workerResult)
 	quit := make(chan bool, workerRoutines)
+	errs := make(chan error)
 	for i := 0; i < workerRoutines; i++ {
-		go calculateHashes(suffix, uint64(i), results, quit)
+		go calculateHashes(suffix, uint64(i), results, quit, errs)
 	}
 	for {
-		result := <-results
-		if result.hashNumber >= workThreshold {
+		select {
+		case result := <-results:
+			if result.hashNumber >= workThreshold {
+				for i := 0; i < workerRoutines; i++ {
+					quit <- true
+				}
+				return result.nonce, nil
+			}
+		case err := <-errs:
 			for i := 0; i < workerRoutines; i++ {
 				quit <- true
 			}
-			return result.nonce, nil
+			return 0, err
 		}
 	}
 }
 
-func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, quit chan bool) {
+func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, quit chan bool, errs chan error) {
 	nonceBytes := make([]byte, 8)
 	hasher, err := blake2b.New(8, nil)
 	if err != nil {
-		panic(err) // Kinda cheap, but will likely never happen.
+		errs <- err
+		return
 	}
 	for {
 		select {
@@ -88,7 +97,8 @@ func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, qui
 			binary.BigEndian.PutUint64(nonceBytes, nonce)
 			_, err := hasher.Write(append(nonceBytes, suffix...))
 			if err != nil {
-				panic(err) // Kinda cheap, but will likely never happen.
+				errs <- err
+				return
 			}
 			hashBytes := hasher.Sum(nil)
 			results <- workerResult{
