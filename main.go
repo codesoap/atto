@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+// TODO: Make error for big.Int parsing problem.
+
 var usage = `Usage:
 	atto n[ew]
 	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE

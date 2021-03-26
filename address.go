@@ -63,3 +63,12 @@ func derivePublicKey(privateKey *big.Int) *big.Int {
 	publicKeyBytes := edwards25519.NewIdentityPoint().ScalarBaseMult(scalar).Bytes()
 	return big.NewInt(0).SetBytes(publicKeyBytes)
 }
+
+func getPublicKeyFromAddress(address string) (*big.Int, error) {
+	if len(address) == 64 {
+		return base32Decode(address[4:56])
+	} else if len(address) == 65 {
+		return base32Decode(address[5:57])
+	}
+	return big.NewInt(0), fmt.Errorf("could not parse address %s", address)
+}

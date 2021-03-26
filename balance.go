@@ -98,7 +98,9 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 			Link:           blockHash,
 			LinkAsAccount:  source.Source,
 		}
-		block.sign(privateKey)
+		if err = block.sign(privateKey); err != nil {
+			return
+		}
 		if err = block.addWork(receiveWorkThreshold, privateKey); err != nil {
 			return
 		}

@@ -33,8 +33,57 @@ type workerResult struct {
 	nonce      uint64
 }
 
-func (b *block) sign(privateKey *big.Int) {
+// Look at https://nanoo.tools/block for a reference.
+func (b *block) sign(privateKey *big.Int) error {
+	publicKey := derivePublicKey(privateKey)
+	hash, err := b.hash(publicKey)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("hash: %x\n", hash)
 	// TODO
+	return nil
+}
+
+func (b *block) hash(publicKey *big.Int) ([]byte, error) {
+	msg := make([]byte, 176, 176)
+
+	msg[31] = 0x6 // block preamble
+
+	publicKeyBytes := make([]byte, 32, 32)
+	publicKey.FillBytes(publicKeyBytes)
+	copy(msg[32:64], publicKeyBytes)
+
+	previous, err := hex.DecodeString(b.Previous)
+	if err != nil {
+		return []byte{}, err
+	}
+	copy(msg[64:96], previous)
+
+	representative, err := getPublicKeyFromAddress(b.Representative)
+	representativeBytes := make([]byte, 32, 32)
+	representative.FillBytes(representativeBytes)
+	if err != nil {
+		return []byte{}, err
+	}
+	copy(msg[96:128], representativeBytes)
+
+	balance, ok := big.NewInt(0).SetString(b.Balance, 10)
+	if !ok {
+		return []byte{}, fmt.Errorf("cannot parse '%s' as an integer", b.Balance)
+	}
+	balanceBytes := make([]byte, 16, 16)
+	balance.FillBytes(balanceBytes)
+	copy(msg[128:144], balanceBytes)
+
+	link, err := hex.DecodeString(b.Link)
+	if err != nil {
+		return []byte{}, err
+	}
+	copy(msg[144:176], link)
+
+	hash := blake2b.Sum256(msg)
+	return hash[:], nil
 }
 
 func (b *block) addWork(workThreshold uint64, privateKey *big.Int) (err error) {
@@ -60,7 +109,7 @@ func (b *block) addWork(workThreshold uint64, privateKey *big.Int) (err error) {
 func findNonce(workThreshold uint64, suffix []byte) (uint64, error) {
 	results := make(chan workerResult)
 	quit := make(chan bool, workerRoutines)
-	errs := make(chan error)
+	errs := make(chan error, workerRoutines)
 	for i := 0; i < workerRoutines; i++ {
 		go calculateHashes(suffix, uint64(i), results, quit, errs)
 	}
