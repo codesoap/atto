@@ -27,6 +27,7 @@ type block struct {
 	LinkAsAccount  string `json:"link_as_account"`
 	Signature      string `json:"signature"`
 	Work           string `json:"work"`
+	Hash           string `json:"-"`
 }
 
 type workerResult struct {
@@ -43,6 +44,7 @@ func (b *block) sign(privateKey *big.Int) error {
 	if err != nil {
 		return err
 	}
+	b.Hash = fmt.Sprintf("%064X", hash)
 	signature := make([]byte, 64, 64)
 
 	privateKeyBytes := make([]byte, 32, 32)

@@ -40,6 +40,10 @@ type pendingBlockSource struct {
 	Source string `json:"source"`
 }
 
+type processResponse struct {
+	Error string `json:"error"`
+}
+
 func printBalance() error {
 	seed, err := getSeed()
 	if err != nil {
@@ -70,7 +74,6 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 		return
 	}
 	address, err := getAddress(privateKey)
-	address = "nano_1111111111111111111111111111111111111111111111111117353trpda" // TODO: Just a test
 	if err != nil {
 		return
 	}
@@ -104,16 +107,35 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 		if err = block.addWork(receiveWorkThreshold, privateKey); err != nil {
 			return
 		}
-		// process := process{
-		// 	Action:    "process",
-		// 	JsonBlock: "true",
-		// 	Subtype:   "receive",
-		// 	Block:     block,
-		// }
-		// TODO: Send block to network
+		process := process{
+			Action:    "process",
+			JsonBlock: "true",
+			Subtype:   "receive",
+			Block:     block,
+		}
+		var requestBody, responseBytes []byte
+		requestBody, err = json.Marshal(process)
+		if err != nil {
+			return
+		}
+		responseBytes, err = doRPC(string(requestBody))
+		if err != nil {
+			return
+		}
+		var processResponse processResponse
+		err = json.Unmarshal(responseBytes, &processResponse)
+		if err != nil {
+			return
+		}
+		// Need to check pending.Error because of
+		// https://github.com/nanocurrency/nano-node/issues/1782.
+		if processResponse.Error != "" {
+			err = fmt.Errorf("could not publish receive block: %s", processResponse.Error)
+			return
+		}
 
 		fmt.Fprintln(os.Stderr, "done")
-		//previousBlock = reivedBlockHash
+		previousBlock = block.Hash
 	}
 	return
 }
