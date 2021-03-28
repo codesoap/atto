@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+// TODO: Ask for confirmation
+
 func sendFunds() error {
 	seed, err := getSeed()
 	if err != nil {
@@ -42,10 +44,6 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 	if err != nil {
 		return err
 	}
-	publicKey, err := getPublicKeyFromAddress(address)
-	if err != nil {
-		return err
-	}
 
 	balance, ok := big.NewInt(0).SetString(info.Balance, 10)
 	if !ok {
@@ -66,15 +64,19 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 	amountInt, _ := amountNumber.Int(big.NewInt(0))
 	balance = balance.Sub(balance, amountInt)
 
-	publicKeyBytes := make([]byte, 32, 32)
-	publicKey.FillBytes(publicKeyBytes)
+	recipientBytes := make([]byte, 32, 32)
+	recipientNumber, err := getPublicKeyFromAddress(recipient)
+	if err != nil {
+		return err
+	}
+	recipientNumber.FillBytes(recipientBytes)
 	block := block{
 		Type:           "state",
 		Account:        address,
 		Previous:       info.Frontier,
 		Representative: info.Representative,
 		Balance:        balance.String(),
-		Link:           fmt.Sprintf("%064X", publicKeyBytes),
+		Link:           fmt.Sprintf("%064X", recipientBytes),
 		LinkAsAccount:  recipient,
 	}
 	if err = block.sign(privateKey); err != nil {
