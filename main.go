@@ -12,6 +12,23 @@ var usage = `Usage:
 	atto [-a ACCOUNT_INDEX] b[alance]
 	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
 	atto [-a ACCOUNT_INDEX] s[end] AMOUNT RECEIVER
+
+The new subcommand generates a new seed, which can later be used with
+the other subcommands.
+
+The address, balance, representative and send subcommands will expect
+a seed as as the first line of their standard input. Showing the first
+address of a newly generated key could work like this:
+atto new | tee seed.txt | atto address
+
+The address subcommand displays addresses for a seed, the balance
+subcommand receives pending sends and shows the balance of an account,
+the representative subcommand changes the account's representative and
+the send subcommand sends funds to an address.
+
+ACCOUNT_INDEX is an optional parameter, which must be a number between 0
+and 4,294,967,295. It allows you to use multiple accounts derived from
+the same seed. By default the account with index 0 is chosen.
 `
 
 var accountIndexFlag uint
