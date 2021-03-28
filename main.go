@@ -10,9 +10,9 @@ import (
 
 var usage = `Usage:
 	atto n[ew]
-	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
 	atto [-a ACCOUNT_INDEX] a[ddress]
 	atto [-a ACCOUNT_INDEX] b[alance]
+	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
 	atto [-a ACCOUNT_INDEX] s[end] AMOUNT RECEIVER
 `
 
@@ -43,9 +43,10 @@ func main() {
 		err = printNewSeed()
 	case "a":
 		err = printAddress()
-	case "r":
 	case "b":
 		err = printBalance()
+	case "r":
+		err = changeRepresentative()
 	case "s":
 		err = sendFunds()
 	}
