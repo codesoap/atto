@@ -7,6 +7,7 @@ import (
 )
 
 // TODO: Make error for big.Int parsing problem.
+// TODO: Extract process rpc into own functions?!
 
 var usage = `Usage:
 	atto n[ew]
@@ -49,6 +50,7 @@ func main() {
 	case "b":
 		err = printBalance()
 	case "s":
+		err = sendFunds()
 	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)

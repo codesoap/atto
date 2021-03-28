@@ -17,6 +17,10 @@ type process struct {
 	Block     block  `json:"block"`
 }
 
+type processResponse struct {
+	Error string `json:"error"`
+}
+
 type block struct {
 	Type           string `json:"type"`
 	Account        string `json:"account"`
