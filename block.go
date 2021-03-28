@@ -17,7 +17,6 @@ type block struct {
 	Representative string `json:"representative"`
 	Balance        string `json:"balance"`
 	Link           string `json:"link"`
-	LinkAsAccount  string `json:"link_as_account"`
 	Signature      string `json:"signature"`
 	Work           string `json:"work"`
 	Hash           string `json:"-"`

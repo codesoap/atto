@@ -88,7 +88,6 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 			Representative: info.Representative,
 			Balance:        updatedBalance.String(),
 			Link:           blockHash,
-			LinkAsAccount:  source.Source,
 		}
 		if err = block.sign(privateKey); err != nil {
 			return

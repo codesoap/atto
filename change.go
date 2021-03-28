@@ -47,7 +47,6 @@ func changeRepresatativeOfAccount(info accountInfo, representative string, priva
 		Representative: representative,
 		Balance:        info.Balance,
 		Link:           "0000000000000000000000000000000000000000000000000000000000000000",
-		LinkAsAccount:  "0000000000000000000000000000000000000000000000000000000000000000",
 	}
 	if err = block.sign(privateKey); err != nil {
 		return err

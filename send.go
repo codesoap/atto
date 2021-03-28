@@ -58,7 +58,6 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 		Representative: info.Representative,
 		Balance:        balance.String(),
 		Link:           fmt.Sprintf("%064X", recipientBytes),
-		LinkAsAccount:  recipient,
 	}
 	if err = block.sign(privateKey); err != nil {
 		return err
