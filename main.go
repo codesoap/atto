@@ -7,23 +7,20 @@ import (
 )
 
 // TODO: Make error for big.Int parsing problem.
-// TODO: Extract process rpc into own functions?!
 
 var usage = `Usage:
 	atto n[ew]
 	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
 	atto [-a ACCOUNT_INDEX] a[ddress]
 	atto [-a ACCOUNT_INDEX] b[alance]
-	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
+	atto [-a ACCOUNT_INDEX] s[end] AMOUNT RECEIVER
 `
 
 var accountIndexFlag uint
-var yFlag bool
 
 func init() {
 	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	flag.UintVar(&accountIndexFlag, "a", 0, "")
-	flag.BoolVar(&yFlag, "y", false, "")
 	flag.Parse()
 	if err := verifyLegalUsage(); err != nil {
 		flag.Usage()

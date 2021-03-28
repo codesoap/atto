@@ -30,8 +30,9 @@ $ # Choosing a representative is important for keeping the network
 $ # decentralized.
 $ pass nano | atto representative nano_1jr699mk1fi6mxy1y76fmuyf3dgms8s5pzcsge5cyt1az93x4n18uxjenx93
 
+$ # Careful with the send subcommand: No confirmation is required!
 $ pass nano | atto send 0.1 nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5
-Send 0.1 NANO to nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5? [y/N]: y
+Creating send block (may take many minutes)... done
 
 $ atto -h
 Usage:
@@ -39,5 +40,5 @@ Usage:
 	atto [-a ACCOUNT_INDEX] a[ddress]
 	atto [-a ACCOUNT_INDEX] b[alance]
 	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
-	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
+	atto [-a ACCOUNT_INDEX] s[end] AMOUNT RECEIVER
 ```

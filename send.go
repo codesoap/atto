@@ -7,8 +7,6 @@ import (
 	"os"
 )
 
-// TODO: Ask for confirmation
-
 func sendFunds() error {
 	seed, err := getSeed()
 	if err != nil {
