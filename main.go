@@ -6,8 +6,6 @@ import (
 	"os"
 )
 
-// TODO: Make error for big.Int parsing problem.
-
 var usage = `Usage:
 	atto n[ew]
 	atto [-a ACCOUNT_INDEX] a[ddress]
@@ -22,18 +20,27 @@ func init() {
 	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	flag.UintVar(&accountIndexFlag, "a", 0, "")
 	flag.Parse()
-	if err := verifyLegalUsage(); err != nil {
+	if flag.NArg() < 1 {
 		flag.Usage()
 		os.Exit(1)
 	}
-}
-
-func verifyLegalUsage() error {
-	// Flags match command.
-	// flags.NArgs OK.
-	// Subcommand exists.
-	// Index positive
-	return nil // TODO
+	var ok bool
+	switch flag.Arg(0)[:1] {
+	case "n":
+		ok = flag.NArg() == 1
+	case "a":
+		ok = flag.NArg() == 1
+	case "b":
+		ok = flag.NArg() == 1
+	case "r":
+		ok = flag.NArg() == 2
+	case "s":
+		ok = flag.NArg() == 3
+	}
+	if !ok {
+		flag.Usage()
+		os.Exit(1)
+	}
 }
 
 func main() {
