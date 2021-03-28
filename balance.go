@@ -89,7 +89,7 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 			return
 		}
 		updatedBalance = updatedBalance.Add(updatedBalance, amount)
-		txt := "Initiating receival of %s from %s... "
+		txt := "Creating receive block for %s from %s... "
 		fmt.Fprintf(os.Stderr, txt, rawToNanoString(amount), source.Source)
 
 		block := block{
