@@ -186,7 +186,7 @@ func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, qui
 		case <-quit:
 			return
 		default:
-			binary.BigEndian.PutUint64(nonceBytes, nonce)
+			binary.LittleEndian.PutUint64(nonceBytes, nonce)
 			_, err := hasher.Write(append(nonceBytes, suffix...))
 			if err != nil {
 				errs <- err
@@ -194,7 +194,7 @@ func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, qui
 			}
 			hashBytes := hasher.Sum(nil)
 			results <- workerResult{
-				hashNumber: binary.BigEndian.Uint64(hashBytes),
+				hashNumber: binary.LittleEndian.Uint64(hashBytes),
 				nonce:      nonce,
 			}
 			hasher.Reset()
