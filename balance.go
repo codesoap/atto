@@ -102,24 +102,7 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 			Subtype:   "receive",
 			Block:     block,
 		}
-		var requestBody, responseBytes []byte
-		requestBody, err = json.Marshal(process)
-		if err != nil {
-			return
-		}
-		responseBytes, err = doRPC(string(requestBody))
-		if err != nil {
-			return
-		}
-		var processResponse processResponse
-		err = json.Unmarshal(responseBytes, &processResponse)
-		if err != nil {
-			return
-		}
-		// Need to check pending.Error because of
-		// https://github.com/nanocurrency/nano-node/issues/1782.
-		if processResponse.Error != "" {
-			err = fmt.Errorf("could not publish receive block: %s", processResponse.Error)
+		if err = doProcessRPCCall(process); err != nil {
 			return
 		}
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"math/big"
@@ -44,26 +43,10 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 	if err != nil {
 		return err
 	}
-
-	balance, ok := big.NewInt(0).SetString(info.Balance, 10)
-	if !ok {
-		err = fmt.Errorf("cannot parse '%s' as an integer", info.Balance)
+	balance, err := getBalanceAfterSend(info.Balance, amount)
+	if err != nil {
 		return err
 	}
-	amountNumber, ok := big.NewFloat(0).SetString(amount)
-	if !ok {
-		err = fmt.Errorf("cannot parse '%s' as a number", amount)
-		return err
-	}
-	rawPerNano, _ := big.NewFloat(0).SetString("1000000000000000000000000000000")
-	amountNumber = amountNumber.Mul(amountNumber, rawPerNano)
-	if !amountNumber.IsInt() {
-		err = fmt.Errorf("'%s' is no legal amount", amount)
-		return err
-	}
-	amountInt, _ := amountNumber.Int(big.NewInt(0))
-	balance = balance.Sub(balance, amountInt)
-
 	recipientBytes := make([]byte, 32, 32)
 	recipientNumber, err := getPublicKeyFromAddress(recipient)
 	if err != nil {
@@ -91,25 +74,26 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 		Subtype:   "send",
 		Block:     block,
 	}
-	var requestBody, responseBytes []byte
-	requestBody, err = json.Marshal(process)
-	if err != nil {
-		return err
+	return doProcessRPCCall(process)
+}
+
+func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
+	balance, ok := big.NewInt(0).SetString(oldBalance, 10)
+	if !ok {
+		err := fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
+		return big.NewInt(0), err
 	}
-	responseBytes, err = doRPC(string(requestBody))
-	if err != nil {
-		return err
+	amountNumber, ok := big.NewFloat(0).SetString(amount)
+	if !ok {
+		err := fmt.Errorf("cannot parse '%s' as a number", amount)
+		return big.NewInt(0), err
 	}
-	var processResponse processResponse
-	err = json.Unmarshal(responseBytes, &processResponse)
-	if err != nil {
-		return err
+	rawPerNano, _ := big.NewFloat(0).SetString("1000000000000000000000000000000")
+	amountNumber = amountNumber.Mul(amountNumber, rawPerNano)
+	if !amountNumber.IsInt() {
+		err := fmt.Errorf("'%s' is no legal amount", amount)
+		return big.NewInt(0), err
 	}
-	// Need to check pending.Error because of
-	// https://github.com/nanocurrency/nano-node/issues/1782.
-	if processResponse.Error != "" {
-		err = fmt.Errorf("could not publish send block: %s", processResponse.Error)
-		return err
-	}
-	return err
+	amountInt, _ := amountNumber.Int(big.NewInt(0))
+	return balance.Sub(balance, amountInt), nil
 }

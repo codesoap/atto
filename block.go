@@ -10,17 +10,6 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-type process struct {
-	Action    string `json:"action"`
-	JsonBlock string `json:"json_block"`
-	Subtype   string `json:"subtype"`
-	Block     block  `json:"block"`
-}
-
-type processResponse struct {
-	Error string `json:"error"`
-}
-
 type block struct {
 	Type           string `json:"type"`
 	Account        string `json:"account"`
