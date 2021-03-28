@@ -70,5 +70,5 @@ func getPublicKeyFromAddress(address string) (*big.Int, error) {
 	} else if len(address) == 65 {
 		return base32Decode(address[5:57])
 	}
-	return big.NewInt(0), fmt.Errorf("could not parse address %s", address)
+	return nil, fmt.Errorf("could not parse address %s", address)
 }

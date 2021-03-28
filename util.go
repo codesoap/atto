@@ -17,7 +17,7 @@ func getSeed() (*big.Int, error) {
 	in := bufio.NewReader(os.Stdin)
 	firstLine, err := in.ReadString('\n')
 	if err != nil {
-		return big.NewInt(0), err
+		return nil, err
 	}
 	seed, ok := big.NewInt(0).SetString(strings.TrimSpace(firstLine), 16)
 	if !ok {

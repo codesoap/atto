@@ -81,18 +81,18 @@ func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
 	balance, ok := big.NewInt(0).SetString(oldBalance, 10)
 	if !ok {
 		err := fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
-		return big.NewInt(0), err
+		return nil, err
 	}
 	amountNumber, ok := big.NewFloat(0).SetString(amount)
 	if !ok {
 		err := fmt.Errorf("cannot parse '%s' as a number", amount)
-		return big.NewInt(0), err
+		return nil, err
 	}
 	rawPerNano, _ := big.NewFloat(0).SetString("1000000000000000000000000000000")
 	amountNumber = amountNumber.Mul(amountNumber, rawPerNano)
 	if !amountNumber.IsInt() {
 		err := fmt.Errorf("'%s' is no legal amount", amount)
-		return big.NewInt(0), err
+		return nil, err
 	}
 	amountInt, _ := amountNumber.Int(big.NewInt(0))
 	return balance.Sub(balance, amountInt), nil
