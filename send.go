@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"strings"
 )
 
 func sendFunds() error {
@@ -74,23 +75,29 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 	return doProcessRPCCall(process)
 }
 
+// getBalanceAfterSend expects oldBalance to be raw and amount to be
+// Nano. amount is converted to raw and substracted from oldBalance, the
+// result is returned.
 func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
 	balance, ok := big.NewInt(0).SetString(oldBalance, 10)
 	if !ok {
 		err := fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
 		return nil, err
 	}
-	amountNumber, ok := big.NewFloat(0).SetString(amount)
+	missingZerosUntilRaw := 30
+	i := strings.Index(amount, ".")
+	if i > -1 {
+		missingZerosUntilRaw -= len(amount) - i - 1
+		if missingZerosUntilRaw < 0 {
+			return nil, fmt.Errorf("'%s' has too many decimal places", amount)
+		}
+	}
+	amount = strings.Replace(amount, ".", "", 1)
+	amount += strings.Repeat("0", missingZerosUntilRaw)
+	amountNumber, ok := big.NewInt(0).SetString(amount, 10)
 	if !ok {
-		err := fmt.Errorf("cannot parse '%s' as a number", amount)
+		err := fmt.Errorf("cannot parse '%s' as an interger", amount)
 		return nil, err
 	}
-	rawPerNano, _ := big.NewFloat(0).SetString("1000000000000000000000000000000")
-	amountNumber = amountNumber.Mul(amountNumber, rawPerNano)
-	if !amountNumber.IsInt() {
-		err := fmt.Errorf("'%s' is no legal amount", amount)
-		return nil, err
-	}
-	amountInt, _ := amountNumber.Int(big.NewInt(0))
-	return balance.Sub(balance, amountInt), nil
+	return balance.Sub(balance, amountNumber), nil
 }
