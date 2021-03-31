@@ -46,12 +46,11 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 	if err != nil {
 		return err
 	}
-	recipientBytes := make([]byte, 32, 32)
 	recipientNumber, err := getPublicKeyFromAddress(recipient)
 	if err != nil {
 		return err
 	}
-	recipientNumber.FillBytes(recipientBytes)
+	recipientBytes := bigIntToBytes(recipientNumber, 32)
 	block := block{
 		Type:           "state",
 		Account:        address,

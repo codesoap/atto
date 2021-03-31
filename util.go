@@ -90,6 +90,10 @@ func base32Decode(in string) (*big.Int, error) {
 	return out, nil
 }
 
+func bigIntToBytes(x *big.Int, n int) []byte {
+	return x.FillBytes(make([]byte, n, n))
+}
+
 func revertBytes(in []byte) []byte {
 	for i := 0; i < len(in)/2; i++ {
 		in[i], in[len(in)-1-i] = in[len(in)-1-i], in[i]
