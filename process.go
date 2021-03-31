@@ -27,8 +27,7 @@ func doProcessRPCCall(process process) error {
 		return err
 	}
 	var processResponse processResponse
-	err = json.Unmarshal(responseBytes, &processResponse)
-	if err != nil {
+	if err = json.Unmarshal(responseBytes, &processResponse); err != nil {
 		return err
 	}
 	// Need to check pending.Error because of

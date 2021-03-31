@@ -146,8 +146,7 @@ func (b *block) addWork(workThreshold uint64, privateKey *big.Int) error {
 		return err
 	}
 	var response workGenerateResponse
-	err = json.Unmarshal(responseBytes, &response)
-	if err != nil {
+	if err = json.Unmarshal(responseBytes, &response); err != nil {
 		return err
 	}
 	// Need to check pending.Error because of
