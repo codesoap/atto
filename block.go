@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/binary"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math/big"
 
@@ -22,9 +22,9 @@ type block struct {
 	Hash           string `json:"-"`
 }
 
-type workerResult struct {
-	hashNumber uint64
-	nonce      uint64
+type workGenerateResponse struct {
+	Error string `json:"error"`
+	Work  string `json:"work"`
 }
 
 func (b *block) sign(privateKey *big.Int) error {
@@ -121,76 +121,35 @@ func (b *block) hash(publicKey *big.Int) ([]byte, error) {
 	return hash[:], nil
 }
 
-func (b *block) addWork(workThreshold uint64, privateKey *big.Int) (err error) {
-	var suffix []byte
+func (b *block) addWork(workThreshold uint64, privateKey *big.Int) error {
+	var hash string
 	if b.Previous == "0000000000000000000000000000000000000000000000000000000000000000" {
 		publicKey := derivePublicKey(privateKey)
-		suffix = make([]byte, 32, 32)
-		publicKey.FillBytes(suffix)
+		publicKeyBytes := make([]byte, 32, 32)
+		publicKey.FillBytes(publicKeyBytes)
+		hash = fmt.Sprintf("%064X", publicKeyBytes)
 	} else {
-		suffix, err = hex.DecodeString(b.Previous)
-		if err != nil {
-			return
-		}
+		hash = b.Previous
 	}
-	nonce, err := findNonce(workThreshold, suffix)
+	requestBody := fmt.Sprintf(`{`+
+		`"action": "work_generate",`+
+		`"hash": "%s",`+
+		`"difficulty": "%016x"`+
+		`}`, string(hash), workThreshold)
+	responseBytes, err := doRPC(requestBody)
 	if err != nil {
-		return
+		return err
 	}
-	b.Work = fmt.Sprintf("%016x", nonce)
-	return
-}
-
-func findNonce(workThreshold uint64, suffix []byte) (uint64, error) {
-	results := make(chan workerResult)
-	quit := make(chan bool, workerRoutines)
-	errs := make(chan error, workerRoutines)
-	for i := 0; i < workerRoutines; i++ {
-		go calculateHashes(suffix, uint64(i), results, quit, errs)
-	}
-	for {
-		select {
-		case result := <-results:
-			if result.hashNumber >= workThreshold {
-				for i := 0; i < workerRoutines; i++ {
-					quit <- true
-				}
-				return result.nonce, nil
-			}
-		case err := <-errs:
-			for i := 0; i < workerRoutines; i++ {
-				quit <- true
-			}
-			return 0, err
-		}
-	}
-}
-
-func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, quit chan bool, errs chan error) {
-	nonceBytes := make([]byte, 8)
-	hasher, err := blake2b.New(8, nil)
+	var response workGenerateResponse
+	err = json.Unmarshal(responseBytes, &response)
 	if err != nil {
-		errs <- err
-		return
+		return err
 	}
-	for {
-		select {
-		case <-quit:
-			return
-		default:
-			binary.LittleEndian.PutUint64(nonceBytes, nonce)
-			_, err := hasher.Write(append(nonceBytes, suffix...))
-			if err != nil {
-				errs <- err
-				return
-			}
-			hashBytes := hasher.Sum(nil)
-			results <- workerResult{
-				hashNumber: binary.LittleEndian.Uint64(hashBytes),
-				nonce:      nonce,
-			}
-			hasher.Reset()
-			nonce += uint64(workerRoutines)
-		}
+	// Need to check pending.Error because of
+	// https://github.com/nanocurrency/nano-node/issues/1782.
+	if response.Error != "" {
+		return fmt.Errorf("could not get work for block: %s", response.Error)
 	}
+	b.Work = response.Work
+	return nil
 }

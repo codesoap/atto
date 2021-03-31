@@ -27,7 +27,7 @@ func sendFunds() error {
 	}
 	amount := flag.Arg(1)
 	recipient := flag.Arg(2)
-	fmt.Fprintf(os.Stderr, "Creating send block (may take many minutes)... ")
+	fmt.Fprintf(os.Stderr, "Creating send block... ")
 	err = sendFundsToAccount(info, amount, recipient, privateKey)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "")
