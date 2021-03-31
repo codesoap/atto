@@ -27,12 +27,11 @@ func getAddress(privateKey *big.Int) (string, error) {
 	publicKey := derivePublicKey(privateKey)
 	base32PublicKey := base32Encode(publicKey)
 
-	publicKeyBytes := make([]byte, 32, 32)
-	publicKey.FillBytes(publicKeyBytes)
 	hasher, err := blake2b.New(5, nil)
 	if err != nil {
 		return "", err
 	}
+	publicKeyBytes := bigIntToBytes(publicKey, 32)
 	if _, err := hasher.Write(publicKeyBytes); err != nil {
 		return "", err
 	}
@@ -46,19 +45,15 @@ func getAddress(privateKey *big.Int) (string, error) {
 }
 
 func getPrivateKey(seed *big.Int, index uint32) *big.Int {
-	seedBytes := make([]byte, 32, 32)
-	seed.FillBytes(seedBytes)
-	indexBytes := make([]byte, 4, 4)
-	big.NewInt(int64(index)).FillBytes(indexBytes)
+	seedBytes := bigIntToBytes(seed, 32)
+	indexBytes := bigIntToBytes(big.NewInt(int64(index)), 4)
 	in := append(seedBytes, indexBytes...)
 	privateKeyBytes := blake2b.Sum256(in)
 	return big.NewInt(0).SetBytes(privateKeyBytes[:])
 }
 
 func derivePublicKey(privateKey *big.Int) *big.Int {
-	privateKeyBytes := make([]byte, 32, 32)
-	privateKey.FillBytes(privateKeyBytes)
-	hashBytes := blake2b.Sum512(privateKeyBytes)
+	hashBytes := blake2b.Sum512(bigIntToBytes(privateKey, 32))
 	scalar := edwards25519.NewScalar().SetBytesWithClamping(hashBytes[:32])
 	publicKeyBytes := edwards25519.NewIdentityPoint().ScalarBaseMult(scalar).Bytes()
 	return big.NewInt(0).SetBytes(publicKeyBytes)

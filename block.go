@@ -44,13 +44,11 @@ func (b *block) sign(privateKey *big.Int) error {
 	b.Hash = fmt.Sprintf("%064X", hash)
 	signature := make([]byte, 64, 64)
 
-	privateKeyBytes := make([]byte, 32, 32)
-	privateKey.FillBytes(privateKeyBytes)
 	h, err := blake2b.New512(nil)
 	if err != nil {
 		return err
 	}
-	h.Write(privateKeyBytes)
+	h.Write(bigIntToBytes(privateKey, 32))
 
 	var digest1, messageDigest, hramDigest [64]byte
 	h.Sum(digest1[:0])
@@ -69,9 +67,7 @@ func (b *block) sign(privateKey *big.Int) error {
 
 	h.Reset()
 	h.Write(encodedR[:])
-	publicKeyBytes := make([]byte, 32, 32)
-	publicKey.FillBytes(publicKeyBytes)
-	h.Write(publicKeyBytes)
+	h.Write(bigIntToBytes(publicKey, 32))
 	h.Write(hash)
 	h.Sum(hramDigest[:0])
 
@@ -90,9 +86,7 @@ func (b *block) hash(publicKey *big.Int) ([]byte, error) {
 
 	msg[31] = 0x6 // block preamble
 
-	publicKeyBytes := make([]byte, 32, 32)
-	publicKey.FillBytes(publicKeyBytes)
-	copy(msg[32:64], publicKeyBytes)
+	copy(msg[32:64], bigIntToBytes(publicKey, 32))
 
 	previous, err := hex.DecodeString(b.Previous)
 	if err != nil {
@@ -101,20 +95,16 @@ func (b *block) hash(publicKey *big.Int) ([]byte, error) {
 	copy(msg[64:96], previous)
 
 	representative, err := getPublicKeyFromAddress(b.Representative)
-	representativeBytes := make([]byte, 32, 32)
-	representative.FillBytes(representativeBytes)
 	if err != nil {
 		return []byte{}, err
 	}
-	copy(msg[96:128], representativeBytes)
+	copy(msg[96:128], bigIntToBytes(representative, 32))
 
 	balance, ok := big.NewInt(0).SetString(b.Balance, 10)
 	if !ok {
 		return []byte{}, fmt.Errorf("cannot parse '%s' as an integer", b.Balance)
 	}
-	balanceBytes := make([]byte, 16, 16)
-	balance.FillBytes(balanceBytes)
-	copy(msg[128:144], balanceBytes)
+	copy(msg[128:144], bigIntToBytes(balance, 16))
 
 	link, err := hex.DecodeString(b.Link)
 	if err != nil {
@@ -130,9 +120,7 @@ func (b *block) addWork(workThreshold uint64, privateKey *big.Int) error {
 	var hash string
 	if b.Previous == "0000000000000000000000000000000000000000000000000000000000000000" {
 		publicKey := derivePublicKey(privateKey)
-		publicKeyBytes := make([]byte, 32, 32)
-		publicKey.FillBytes(publicKeyBytes)
-		hash = fmt.Sprintf("%064X", publicKeyBytes)
+		hash = fmt.Sprintf("%064X", bigIntToBytes(publicKey, 32))
 	} else {
 		hash = b.Previous
 	}
