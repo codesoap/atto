@@ -41,11 +41,11 @@ Creating receive block for 0.100 from nano_39nd8eksw1ia6aokn96z4uthocke47hfsx9gr
 $ # Choosing a representative is important for keeping the network
 $ # decentralized.
 $ pass nano | atto representative nano_1jr699mk1fi6mxy1y76fmuyf3dgms8s5pzcsge5cyt1az93x4n18uxjenx93
-Creating change block (may take many minutes)... done
+Creating change block... done
 
 $ # Careful with the send subcommand: No confirmation is required!
 $ pass nano | atto send 0.1 nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5
-Creating send block (may take many minutes)... done
+Creating send block... done
 
 $ atto -h
 Usage:
@@ -80,11 +80,11 @@ and ensure, that it does nothing you wouldn't want it to do.
 
 To change some defaults, take a look at `config.go`.
 
-Signatures and proof of work are created without the help of external
-services. This means that the creation of new blocks will take some
-time and CPU power. Depending on your CPU, operating system and chance,
-calculating the proof of work for "send" and "change" blocks can take
-anywhere from a few seconds to 15 minutes or more.
+Signatures are created without the help of a node, to avoid your seed or
+private keys being stolen by a node operator. Apparently this is not to
+be taken for granted, since the node API offers, for example, a [method
+for signing](https://docs.nano.org/commands/rpc-protocol/#sign) your
+blocks.
 
 atto does not have any persistance and writes nothing to your
 file system. This makes atto very portable, but also means, that

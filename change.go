@@ -25,7 +25,7 @@ func changeRepresentative() error {
 		return fmt.Errorf("account has not yet been opened")
 	}
 	representative := flag.Arg(1)
-	fmt.Fprintf(os.Stderr, "Creating change block (may take many minutes)... ")
+	fmt.Fprintf(os.Stderr, "Creating change block... ")
 	err = changeRepresatativeOfAccount(info, representative, privateKey)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "")
