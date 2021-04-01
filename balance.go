@@ -77,7 +77,7 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 			err = fmt.Errorf("cannot parse '%s' as an integer", source.Amount)
 			return
 		}
-		updatedBalance = updatedBalance.Add(updatedBalance, amount)
+		updatedBalance.Add(updatedBalance, amount)
 		txt := "Creating receive block for %s from %s... "
 		fmt.Fprintf(os.Stderr, txt, rawToNanoString(amount), source.Source)
 

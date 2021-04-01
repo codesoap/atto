@@ -80,12 +80,12 @@ func base32Decode(in string) (*big.Int, error) {
 	out := big.NewInt(0)
 	radix := big.NewInt(32)
 	for _, r := range in {
-		out = out.Mul(out, radix)
+		out.Mul(out, radix)
 		val, ok := reverseAlphabet[r]
 		if !ok {
 			return out, fmt.Errorf("'%c' is no legal base32 character", r)
 		}
-		out = out.Add(out, val)
+		out.Add(out, val)
 	}
 	return out, nil
 }
