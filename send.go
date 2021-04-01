@@ -89,8 +89,8 @@ func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
 		if missingZerosUntilRaw < 0 {
 			return nil, fmt.Errorf("'%s' has too many decimal places", amount)
 		}
+		amount = strings.Replace(amount, ".", "", 1)
 	}
-	amount = strings.Replace(amount, ".", "", 1)
 	amount += strings.Repeat("0", missingZerosUntilRaw)
 	amountNumber, ok := big.NewInt(0).SetString(amount, 10)
 	if !ok {
