@@ -30,7 +30,6 @@ func sendFunds() error {
 	fmt.Fprintf(os.Stderr, "Creating send block... ")
 	err = sendFundsToAccount(info, amount, recipient, privateKey)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "")
 		return err
 	}
 	fmt.Fprintln(os.Stderr, "done")
