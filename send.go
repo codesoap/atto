@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"strings"
 )
 
 func sendFunds() error {
@@ -70,6 +69,10 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 		Subtype:   "send",
 		Block:     block,
 	}
+	if true {
+		println(block.Balance)
+		os.Exit(1)
+	}
 	return doProcessRPCCall(process)
 }
 
@@ -77,25 +80,25 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 // Nano. amount is converted to raw and subtracted from oldBalance, the
 // result is returned.
 func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
+	f, ok := big.NewFloat(0).SetPrec(128).SetString(amount)
+	if !ok {
+		return nil, fmt.Errorf("cannot parse '%s' as a number", amount)
+	}
+	rawPerNano, ok := big.NewFloat(0).SetPrec(128).SetString("1000000000000000000000000000000")
+	if !ok {
+		return nil, fmt.Errorf("unknown failure while parsing float")
+	}
+	if f.Mul(f, rawPerNano); f.Acc() != big.Exact {
+		return nil, fmt.Errorf("amount inaccurate after multiplication")
+	}
+	amountNumber, accuracy := f.Int(big.NewInt(0))
+	if accuracy != big.Exact {
+		return nil, fmt.Errorf("failed to get raw from given amount")
+	}
+
 	balance, ok := big.NewInt(0).SetString(oldBalance, 10)
 	if !ok {
-		err := fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
-		return nil, err
-	}
-	missingZerosUntilRaw := 30
-	i := strings.Index(amount, ".")
-	if i > -1 {
-		missingZerosUntilRaw -= len(amount) - i - 1
-		if missingZerosUntilRaw < 0 {
-			return nil, fmt.Errorf("'%s' has too many decimal places", amount)
-		}
-		amount = strings.Replace(amount, ".", "", 1)
-	}
-	amount += strings.Repeat("0", missingZerosUntilRaw)
-	amountNumber, ok := big.NewInt(0).SetString(amount, 10)
-	if !ok {
-		err := fmt.Errorf("cannot parse '%s' as an interger", amount)
-		return nil, err
+		return nil, fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
 	}
 	return balance.Sub(balance, amountNumber), nil
 }
