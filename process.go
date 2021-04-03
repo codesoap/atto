@@ -16,7 +16,7 @@ type processResponse struct {
 	Error string `json:"error"`
 }
 
-func doProcessRPCCall(process process) error {
+func doProcessRPC(process process) error {
 	var requestBody, responseBytes []byte
 	requestBody, err := json.Marshal(process)
 	if err != nil {

@@ -60,5 +60,5 @@ func changeRepresatativeOfAccount(info accountInfo, representative string, priva
 		Subtype:   "change",
 		Block:     block,
 	}
-	return doProcessRPCCall(process)
+	return doProcessRPC(process)
 }

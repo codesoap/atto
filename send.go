@@ -70,7 +70,7 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 		Subtype:   "send",
 		Block:     block,
 	}
-	return doProcessRPCCall(process)
+	return doProcessRPC(process)
 }
 
 // getBalanceAfterSend expects oldBalance to be raw and amount to be

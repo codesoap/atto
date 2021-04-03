@@ -101,7 +101,7 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 			Subtype:   "receive",
 			Block:     block,
 		}
-		if err = doProcessRPCCall(process); err != nil {
+		if err = doProcessRPC(process); err != nil {
 			return
 		}
 
