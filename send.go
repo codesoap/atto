@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -77,18 +78,21 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 // Nano. amount is converted to raw and subtracted from oldBalance, the
 // result is returned.
 func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
+	amountOk, err := regexp.MatchString(`^([0-9]+|[0-9]*\.[0-9]{1,30})$`, amount)
+	if !amountOk {
+		return nil, fmt.Errorf("'%s' is no legal amount", amount)
+	} else if err != nil {
+		return nil, err
+	}
+
 	balance, ok := big.NewInt(0).SetString(oldBalance, 10)
 	if !ok {
 		err := fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
 		return nil, err
 	}
 	missingZerosUntilRaw := 30
-	i := strings.Index(amount, ".")
-	if i > -1 {
+	if i := strings.Index(amount, "."); i > -1 {
 		missingZerosUntilRaw -= len(amount) - i - 1
-		if missingZerosUntilRaw < 0 {
-			return nil, fmt.Errorf("'%s' has too many decimal places", amount)
-		}
 		amount = strings.Replace(amount, ".", "", 1)
 	}
 	amount += strings.Repeat("0", missingZerosUntilRaw)
