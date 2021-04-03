@@ -74,32 +74,37 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 	return doProcessRPC(process)
 }
 
-// getBalanceAfterSend expects oldBalance to be raw and amount to be
-// Nano. amount is converted to raw and subtracted from oldBalance, the
-// result is returned.
 func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
-	amountOk, err := regexp.MatchString(`^([0-9]+|[0-9]*\.[0-9]{1,30})$`, amount)
-	if !amountOk {
-		return nil, fmt.Errorf("'%s' is no legal amount", amount)
-	} else if err != nil {
-		return nil, err
-	}
-
 	balance, ok := big.NewInt(0).SetString(oldBalance, 10)
 	if !ok {
 		err := fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
 		return nil, err
 	}
-	missingZerosUntilRaw := 30
-	if i := strings.Index(amount, "."); i > -1 {
-		missingZerosUntilRaw -= len(amount) - i - 1
-		amount = strings.Replace(amount, ".", "", 1)
-	}
-	amount += strings.Repeat("0", missingZerosUntilRaw)
-	amountNumber, ok := big.NewInt(0).SetString(amount, 10)
-	if !ok {
-		err := fmt.Errorf("cannot parse '%s' as an interger", amount)
+	amountRaw, err := nanoStringToRaw(amount)
+	if err != nil {
 		return nil, err
 	}
-	return balance.Sub(balance, amountNumber), nil
+	return balance.Sub(balance, amountRaw), nil
+}
+
+func nanoStringToRaw(amountString string) (*big.Int, error) {
+	pattern := `^([0-9]+|[0-9]*\.[0-9]{1,30})$`
+	amountOk, err := regexp.MatchString(pattern, amountString)
+	if !amountOk {
+		return nil, fmt.Errorf("'%s' is no legal amountString", amountString)
+	} else if err != nil {
+		return nil, err
+	}
+	missingZerosUntilRaw := 30
+	if i := strings.Index(amountString, "."); i > -1 {
+		missingZerosUntilRaw -= len(amountString) - i - 1
+		amountString = strings.Replace(amountString, ".", "", 1)
+	}
+	amountString += strings.Repeat("0", missingZerosUntilRaw)
+	amount, ok := big.NewInt(0).SetString(amountString, 10)
+	if !ok {
+		err := fmt.Errorf("cannot parse '%s' as an interger", amountString)
+		return nil, err
+	}
+	return amount, nil
 }
