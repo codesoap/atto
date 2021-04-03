@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/big"
 
-	"filippo.io/edwards25519"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -28,55 +27,22 @@ type workGenerateResponse struct {
 }
 
 func (b *block) sign(privateKey *big.Int) error {
-	// Look at https://nanoo.tools/block for a reference. This
-	// implementation based on the one from github.com/iotaledger/iota.go.
-
 	publicKey := derivePublicKey(privateKey)
 	hash, err := b.hash(publicKey)
 	if err != nil {
 		return err
 	}
 	b.Hash = fmt.Sprintf("%064X", hash)
-	signature := make([]byte, 64, 64)
-
-	h, err := blake2b.New512(nil)
+	signature, err := sign(privateKey, hash)
 	if err != nil {
 		return err
 	}
-	h.Write(bigIntToBytes(privateKey, 32))
-
-	var digest1, messageDigest, hramDigest [64]byte
-	h.Sum(digest1[:0])
-
-	s := new(edwards25519.Scalar).SetBytesWithClamping(digest1[:32])
-
-	h.Reset()
-	h.Write(digest1[32:])
-	h.Write(hash)
-	h.Sum(messageDigest[:0])
-
-	rReduced := new(edwards25519.Scalar).SetUniformBytes(messageDigest[:])
-	R := new(edwards25519.Point).ScalarBaseMult(rReduced)
-
-	encodedR := R.Bytes()
-
-	h.Reset()
-	h.Write(encodedR[:])
-	h.Write(bigIntToBytes(publicKey, 32))
-	h.Write(hash)
-	h.Sum(hramDigest[:0])
-
-	kReduced := new(edwards25519.Scalar).SetUniformBytes(hramDigest[:])
-	S := new(edwards25519.Scalar).MultiplyAdd(kReduced, s, rReduced)
-
-	copy(signature[:], encodedR[:])
-	copy(signature[32:], S.Bytes())
-
 	b.Signature = fmt.Sprintf("%0128X", signature)
 	return nil
 }
 
 func (b *block) hash(publicKey *big.Int) ([]byte, error) {
+	// Look at https://nanoo.tools/block for a reference.
 	msg := make([]byte, 176, 176)
 
 	msg[31] = 0x6 // block preamble
