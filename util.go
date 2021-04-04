@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/big"
@@ -21,7 +20,7 @@ func getSeed() (*big.Int, error) {
 	}
 	seed, ok := big.NewInt(0).SetString(strings.TrimSpace(firstLine), 16)
 	if !ok {
-		return seed, errors.New("could not parse seed")
+		return nil, fmt.Errorf("could not parse seed")
 	}
 	return seed, nil
 }
