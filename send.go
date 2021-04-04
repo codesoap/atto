@@ -7,10 +7,14 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 func sendFunds() error {
-	seed, err := getSeed()
+	amount := flag.Arg(1)
+	recipient := flag.Arg(2)
+	seed, err := getSeedForSending(amount, recipient)
 	if err != nil {
 		return err
 	}
@@ -26,8 +30,6 @@ func sendFunds() error {
 	if info.Frontier == "0000000000000000000000000000000000000000000000000000000000000000" {
 		return fmt.Errorf("account has not yet been opened")
 	}
-	amount := flag.Arg(1)
-	recipient := flag.Arg(2)
 	fmt.Fprintf(os.Stderr, "Creating send block... ")
 	err = sendFundsToAccount(info, amount, recipient, privateKey)
 	if err != nil {
@@ -35,6 +37,30 @@ func sendFunds() error {
 	}
 	fmt.Fprintln(os.Stderr, "done")
 	return nil
+}
+
+func getSeedForSending(amount, recipient string) (*big.Int, error) {
+	if yFlag {
+		return getSeed()
+	}
+	fmt.Print("Seed: ")
+	seedBytes, err := term.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Println("")
+	if err != nil {
+		return nil, err
+	}
+	seed, ok := big.NewInt(0).SetString(strings.TrimSpace(string(seedBytes)), 16)
+	if !ok {
+		return nil, fmt.Errorf("could not parse seed")
+	}
+	fmt.Printf("Send %s NANO to %s? [y/N]: ", amount, recipient)
+	var confirmation string
+	fmt.Scanln(&confirmation)
+	if confirmation != "y" && confirmation != "Y" {
+		fmt.Fprintln(os.Stderr, "Send aborted.")
+		os.Exit(0)
+	}
+	return seed, nil
 }
 
 func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *big.Int) error {

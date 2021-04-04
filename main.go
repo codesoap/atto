@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"golang.org/x/term"
 )
 
 var usage = `Usage:
@@ -11,15 +13,19 @@ var usage = `Usage:
 	atto [-a ACCOUNT_INDEX] a[ddress]
 	atto [-a ACCOUNT_INDEX] b[alance]
 	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
-	atto [-a ACCOUNT_INDEX] s[end] AMOUNT RECEIVER
+	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
 
 The new subcommand generates a new seed, which can later be used with
 the other subcommands.
 
-The address, balance, representative and send subcommands will expect
-a seed as as the first line of their standard input. Showing the first
-address of a newly generated key could work like this:
+The address, balance and representative subcommands expect a seed as as
+the first line of their standard input. Showing the first address of a
+newly generated key could work like this:
 atto new | tee seed.txt | atto address
+
+The send subcommand also expects a seed as the first line of input, if
+the -y flag is given. If the -y flag is not given, the send subcommand
+interactively asks for the seed and confirmation.
 
 The address subcommand displays addresses for a seed, the balance
 subcommand receives pending sends and shows the balance of an account,
@@ -32,10 +38,12 @@ the same seed. By default the account with index 0 is chosen.
 `
 
 var accountIndexFlag uint
+var yFlag bool
 
 func init() {
 	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	flag.UintVar(&accountIndexFlag, "a", 0, "")
+	flag.BoolVar(&yFlag, "y", false, "")
 	flag.Parse()
 	if flag.NArg() < 1 {
 		flag.Usage()
@@ -52,6 +60,11 @@ func init() {
 	case "r":
 		ok = flag.NArg() == 2
 	case "s":
+		if !yFlag && !term.IsTerminal(int(os.Stdin.Fd())) {
+			msg := "Error: input is not a terminal. Did you forget to use the -y flag?"
+			fmt.Fprintln(os.Stderr, msg)
+			os.Exit(1)
+		}
 		ok = flag.NArg() == 3
 	}
 	if !ok {

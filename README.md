@@ -43,8 +43,11 @@ $ # decentralized.
 $ pass nano | atto representative nano_1jr699mk1fi6mxy1y76fmuyf3dgms8s5pzcsge5cyt1az93x4n18uxjenx93
 Creating change block... done
 
-$ # Careful with the send subcommand: No confirmation is required!
-$ pass nano | atto send 0.1 nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5
+$ # To avoid accidental loss of funds, the send command is interactive,
+$ # unless the -y flag is given:
+$ atto send 0.1 nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5
+Seed: D420296F5FEF486175FAA8F649DED00A5B0A096DB8D03972937542C51A7F296C
+Send 0.001 NANO to nano_3igsu9wop4zktr9ups8gct6zzr73nxr9yuetui6qj6x4xec9uazyr9zoaz4g? [y/N]: y
 Creating send block... done
 
 $ atto -h
@@ -53,15 +56,19 @@ Usage:
 	atto [-a ACCOUNT_INDEX] a[ddress]
 	atto [-a ACCOUNT_INDEX] b[alance]
 	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
-	atto [-a ACCOUNT_INDEX] s[end] AMOUNT RECEIVER
+	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
 
 The new subcommand generates a new seed, which can later be used with
 the other subcommands.
 
-The address, balance, representative and send subcommands will expect
-a seed as as the first line of their standard input. Showing the first
-address of a newly generated key could work like this:
+The address, balance and representative subcommands expect a seed as as
+the first line of their standard input. Showing the first address of a
+newly generated key could work like this:
 atto new | tee seed.txt | atto address
+
+The send subcommand also expects a seed as the first line of input, if
+the -y flag is given. If the -y flag is not given, the send subcommand
+interactively asks for the seed and confirmation.
 
 The address subcommand displays addresses for a seed, the balance
 subcommand receives pending sends and shows the balance of an account,
