@@ -30,7 +30,7 @@ func doProcessRPC(process process) error {
 	if err = json.Unmarshal(responseBytes, &processResponse); err != nil {
 		return err
 	}
-	// Need to check pending.Error because of
+	// Need to check processResponse.Error because of
 	// https://github.com/nanocurrency/nano-node/issues/1782.
 	if processResponse.Error != "" {
 		err = fmt.Errorf("could not publish block: %s", processResponse.Error)

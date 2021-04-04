@@ -126,7 +126,7 @@ func (b *block) addWork(workThreshold uint64, privateKey *big.Int) error {
 	if err = json.Unmarshal(responseBytes, &response); err != nil {
 		return err
 	}
-	// Need to check pending.Error because of
+	// Need to check response.Error because of
 	// https://github.com/nanocurrency/nano-node/issues/1782.
 	if response.Error != "" {
 		return fmt.Errorf("could not get work for block: %s", response.Error)
