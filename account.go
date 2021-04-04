@@ -12,6 +12,11 @@ type accountInfo struct {
 	Balance        string `json:"balance"`
 }
 
+type blockInfo struct {
+	Error    string `json:"error"`
+	Contents block  `json:"contents"`
+}
+
 func getAccountInfo(address string) (info accountInfo, err error) {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "account_info",`+
@@ -33,6 +38,41 @@ func getAccountInfo(address string) (info accountInfo, err error) {
 		info.Balance = "0"
 	} else if info.Error != "" {
 		err = fmt.Errorf("could not fetch balance: %s", info.Error)
+		return
 	}
+	err = verifyInfo(info, address)
 	return
+}
+
+// verifyInfo gets the frontier block of info, ensures that Hash,
+// Representative and Balance match and verifies it's signature.
+func verifyInfo(info accountInfo, address string) error {
+	requestBody := fmt.Sprintf(`{`+
+		`"action": "block_info",`+
+		`"json_block": "true",`+
+		`"hash": "%s"`+
+		`}`, info.Frontier)
+	responseBytes, err := doRPC(requestBody)
+	if err != nil {
+		return err
+	}
+	var block blockInfo
+	if err = json.Unmarshal(responseBytes, &block); err != nil {
+		return err
+	}
+	if info.Error != "" {
+		return fmt.Errorf("could not get block info: %s", info.Error)
+	}
+	publicKey, err := getPublicKeyFromAddress(address)
+	if err != nil {
+		return err
+	}
+	if err = block.Contents.verifySignature(publicKey); err == errInvalidSignature ||
+		info.Frontier != block.Contents.Hash ||
+		info.Representative != block.Contents.Representative ||
+		info.Balance != block.Contents.Balance {
+		return fmt.Errorf("the received account info has been manipulated; " +
+			"change your node immediately!")
+	}
+	return err
 }

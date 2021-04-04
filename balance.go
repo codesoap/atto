@@ -106,7 +106,7 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 		}
 
 		fmt.Fprintln(os.Stderr, "done")
-		previousBlock = block.Hash
+		previousBlock = block.Hash // Hash was computed during signing.
 	}
 	return
 }

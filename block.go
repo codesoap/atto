@@ -9,6 +9,8 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
+var errInvalidSignature = fmt.Errorf("invalid block signature")
+
 type block struct {
 	Type           string `json:"type"`
 	Account        string `json:"account"`
@@ -19,6 +21,7 @@ type block struct {
 	Signature      string `json:"signature"`
 	Work           string `json:"work"`
 	Hash           string `json:"-"`
+	HashBytes      []byte `json:"-"`
 }
 
 type workGenerateResponse struct {
@@ -28,12 +31,10 @@ type workGenerateResponse struct {
 
 func (b *block) sign(privateKey *big.Int) error {
 	publicKey := derivePublicKey(privateKey)
-	hash, err := b.hash(publicKey)
-	if err != nil {
+	if err := b.addHashIfUnhashed(publicKey); err != nil {
 		return err
 	}
-	b.Hash = fmt.Sprintf("%064X", hash)
-	signature, err := sign(privateKey, hash)
+	signature, err := sign(privateKey, b.HashBytes)
 	if err != nil {
 		return err
 	}
@@ -41,8 +42,35 @@ func (b *block) sign(privateKey *big.Int) error {
 	return nil
 }
 
+func (b *block) verifySignature(publicKey *big.Int) (err error) {
+	if err = b.addHashIfUnhashed(publicKey); err != nil {
+		return
+	}
+	sig, ok := big.NewInt(0).SetString(b.Signature, 16)
+	if !ok {
+		return fmt.Errorf("cannot parse '%s' as an integer", b.Signature)
+	}
+	if !isValidSignature(publicKey, b.HashBytes, bigIntToBytes(sig, 64)) {
+		err = errInvalidSignature
+	}
+	return
+}
+
+func (b *block) addHashIfUnhashed(publicKey *big.Int) error {
+	if b.Hash == "" || len(b.HashBytes) == 0 {
+		hashBytes, err := b.hash(publicKey)
+		if err != nil {
+			return err
+		}
+		b.HashBytes = hashBytes
+		b.Hash = fmt.Sprintf("%064X", b.HashBytes)
+	}
+	return nil
+}
+
 func (b *block) hash(publicKey *big.Int) ([]byte, error) {
-	// Look at https://nanoo.tools/block for a reference.
+	// See https://nanoo.tools/block for a reference.
+
 	msg := make([]byte, 176, 176)
 
 	msg[31] = 0x6 // block preamble

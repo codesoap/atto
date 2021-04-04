@@ -81,10 +81,9 @@ and ensure, that it does nothing you wouldn't want it to do.
 To change some defaults, take a look at `config.go`.
 
 Signatures are created without the help of a node, to avoid your seed or
-private keys being stolen by a node operator. Apparently this is not to
-be taken for granted, since the node API offers, for example, a [method
-for signing](https://docs.nano.org/commands/rpc-protocol/#sign) your
-blocks.
+private keys being stolen by a node operator. The received account info
+is always validated using block signatures to ensure the node operator
+cannot manipulate atto by, for example, reporting wrong balances.
 
 atto does not have any persistance and writes nothing to your
 file system. This makes atto very portable, but also means, that
