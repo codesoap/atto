@@ -7,8 +7,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	"golang.org/x/term"
 )
 
 func sendFunds() error {
@@ -47,20 +45,17 @@ func getSeedForSending(amount, recipient string) (*big.Int, error) {
 	if !yFlag {
 		fmt.Printf("Send %s NANO to %s? [y/N]: ", amount, recipient)
 
-		// This code is inspired by code from filippo.io/age.
-		in := os.Stdin
-		if !term.IsTerminal(int(in.Fd())) {
-			tty, err := os.Open("/dev/tty")
-			if err != nil {
-				msg := "could not open terminal for confirmation input: %v"
-				return nil, fmt.Errorf(msg, err)
-			}
-			defer tty.Close()
-			in = tty
+		// Explicitly openning /dev/tty ensures function, even if the
+		// standard input is not a terminal.
+		tty, err := os.Open("/dev/tty")
+		if err != nil {
+			msg := "could not open terminal for confirmation input: %v"
+			return nil, fmt.Errorf(msg, err)
 		}
+		defer tty.Close()
 
 		var confirmation string
-		fmt.Fscanln(in, &confirmation)
+		fmt.Fscanln(tty, &confirmation)
 		if confirmation != "y" && confirmation != "Y" {
 			fmt.Fprintln(os.Stderr, "Send aborted.")
 			os.Exit(0)
