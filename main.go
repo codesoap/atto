@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-
-	"golang.org/x/term"
 )
 
 var usage = `Usage:
@@ -18,14 +16,13 @@ var usage = `Usage:
 The new subcommand generates a new seed, which can later be used with
 the other subcommands.
 
-The address, balance and representative subcommands expect a seed as as
-the first line of their standard input. Showing the first address of a
-newly generated key could work like this:
+The address, balance, representative and send subcommands expect a seed
+as as the first line of their standard input. Showing the first address
+of a newly generated key could work like this:
 atto new | tee seed.txt | atto address
 
-The send subcommand also expects a seed as the first line of input, if
-the -y flag is given. If the -y flag is not given, the send subcommand
-interactively asks for the seed and confirmation.
+The send subcommand also expects manual confirmation of the transaction,
+unless the -y flag is given.
 
 The address subcommand displays addresses for a seed, the balance
 subcommand receives pending sends and shows the balance of an account,
@@ -60,11 +57,6 @@ func init() {
 	case "r":
 		ok = flag.NArg() == 2
 	case "s":
-		if !yFlag && !term.IsTerminal(int(os.Stdin.Fd())) {
-			msg := "Error: input is not a terminal. Did you forget to use the -y flag?"
-			fmt.Fprintln(os.Stderr, msg)
-			os.Exit(1)
-		}
 		ok = flag.NArg() == 3
 	}
 	if !ok {

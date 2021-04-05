@@ -40,25 +40,31 @@ func sendFunds() error {
 }
 
 func getSeedForSending(amount, recipient string) (*big.Int, error) {
-	if yFlag {
-		return getSeed()
-	}
-	fmt.Print("Seed: ")
-	seedBytes, err := term.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Println("")
+	seed, err := getSeed()
 	if err != nil {
 		return nil, err
 	}
-	seed, ok := big.NewInt(0).SetString(strings.TrimSpace(string(seedBytes)), 16)
-	if !ok {
-		return nil, fmt.Errorf("could not parse seed")
-	}
-	fmt.Printf("Send %s NANO to %s? [y/N]: ", amount, recipient)
-	var confirmation string
-	fmt.Scanln(&confirmation)
-	if confirmation != "y" && confirmation != "Y" {
-		fmt.Fprintln(os.Stderr, "Send aborted.")
-		os.Exit(0)
+	if !yFlag {
+		fmt.Printf("Send %s NANO to %s? [y/N]: ", amount, recipient)
+
+		// This code is inspired by code from filippo.io/age.
+		in := os.Stdin
+		if !term.IsTerminal(int(in.Fd())) {
+			tty, err := os.Open("/dev/tty")
+			if err != nil {
+				msg := "could not open terminal for confirmation input: %v"
+				return nil, fmt.Errorf(msg, err)
+			}
+			defer tty.Close()
+			in = tty
+		}
+
+		var confirmation string
+		fmt.Fscanln(in, &confirmation)
+		if confirmation != "y" && confirmation != "Y" {
+			fmt.Fprintln(os.Stderr, "Send aborted.")
+			os.Exit(0)
+		}
 	}
 	return seed, nil
 }
