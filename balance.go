@@ -45,7 +45,12 @@ func printBalance() error {
 	}
 
 	info, err := getAccountInfo(address)
-	if err != nil {
+	if err == errAccountNotFound {
+		// This info is needed to create the first block:
+		info.Frontier = "0000000000000000000000000000000000000000000000000000000000000000"
+		info.Representative = defaultRepresentative
+		info.Balance = "0"
+	} else if err != nil {
 		return err
 	}
 	updatedBalance, err := receivePendingSends(info, privateKey)

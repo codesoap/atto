@@ -25,9 +25,6 @@ func sendFunds() error {
 	if err != nil {
 		return err
 	}
-	if info.Frontier == "0000000000000000000000000000000000000000000000000000000000000000" {
-		return fmt.Errorf("account has not yet been opened")
-	}
 	fmt.Fprintf(os.Stderr, "Creating send block... ")
 	err = sendFundsToAccount(info, amount, recipient, privateKey)
 	if err != nil {

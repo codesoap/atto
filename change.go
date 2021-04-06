@@ -21,9 +21,6 @@ func changeRepresentative() error {
 	if err != nil {
 		return err
 	}
-	if info.Frontier == "0000000000000000000000000000000000000000000000000000000000000000" {
-		return fmt.Errorf("account has not yet been opened")
-	}
 	representative := flag.Arg(1)
 	fmt.Fprintf(os.Stderr, "Creating change block... ")
 	err = changeRepresatativeOfAccount(info, representative, privateKey)

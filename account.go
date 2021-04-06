@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+var errAccountNotFound = fmt.Errorf("account has not yet been opened")
+
 type accountInfo struct {
 	Error          string `json:"error"`
 	Frontier       string `json:"frontier"`
@@ -33,12 +35,9 @@ func getAccountInfo(address string) (info accountInfo, err error) {
 	// Need to check info.Error because of
 	// https://github.com/nanocurrency/nano-node/issues/1782.
 	if info.Error == "Account not found" {
-		info.Frontier = "0000000000000000000000000000000000000000000000000000000000000000"
-		info.Representative = defaultRepresentative
-		info.Balance = "0"
+		err = errAccountNotFound
 	} else if info.Error != "" {
 		err = fmt.Errorf("could not fetch account info: %s", info.Error)
-		return
 	} else {
 		err = verifyInfo(info, address)
 	}
