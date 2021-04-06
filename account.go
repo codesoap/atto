@@ -39,8 +39,9 @@ func getAccountInfo(address string) (info accountInfo, err error) {
 	} else if info.Error != "" {
 		err = fmt.Errorf("could not fetch account info: %s", info.Error)
 		return
+	} else {
+		err = verifyInfo(info, address)
 	}
-	err = verifyInfo(info, address)
 	return
 }
 
