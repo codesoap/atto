@@ -37,7 +37,7 @@ func getAccountInfo(address string) (info accountInfo, err error) {
 		info.Representative = defaultRepresentative
 		info.Balance = "0"
 	} else if info.Error != "" {
-		err = fmt.Errorf("could not fetch balance: %s", info.Error)
+		err = fmt.Errorf("could not fetch account info: %s", info.Error)
 		return
 	}
 	err = verifyInfo(info, address)
