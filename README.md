@@ -43,10 +43,10 @@ $ # decentralized.
 $ pass nano | atto representative nano_1jr699mk1fi6mxy1y76fmuyf3dgms8s5pzcsge5cyt1az93x4n18uxjenx93
 Creating change block... done
 
-$ # To avoid accidental loss of funds, the send subcommand requires
+$ # To avoid accidental loss of funds, the send command requires
 $ # confirmation, unless the -y flag is given:
 $ pass nano | atto send 0.1 nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5
-Send 0.001 NANO to nano_3igsu9wop4zktr9ups8gct6zzr73nxr9yuetui6qj6x4xec9uazyr9zoaz4g? [y/N]: y
+Send 0.1 NANO to nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5? [y/N]: y
 Creating send block... done
 
 $ atto -h
