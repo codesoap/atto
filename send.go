@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
@@ -42,9 +43,14 @@ func getSeedForSending(amount, recipient string) (*big.Int, error) {
 	if !yFlag {
 		fmt.Printf("Send %s NANO to %s? [y/N]: ", amount, recipient)
 
-		// Explicitly openning /dev/tty ensures function, even if the
-		// standard input is not a terminal.
-		tty, err := os.Open("/dev/tty")
+		// Explicitly openning /dev/tty or CONIN$ ensures function, even if
+		// the standard input is not a terminal.
+		var tty *os.File
+		if runtime.GOOS == "windows" {
+			tty, err = os.Open("CONIN$")
+		} else {
+			tty, err = os.Open("/dev/tty")
+		}
 		if err != nil {
 			msg := "could not open terminal for confirmation input: %v"
 			return nil, fmt.Errorf(msg, err)
