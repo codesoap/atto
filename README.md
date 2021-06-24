@@ -28,9 +28,14 @@ $ pass insert nano
 Enter password for nano: D420296F5FEF486175FAA8F649DED00A5B0A096DB8D03972937542C51A7F296C
 Retype password for nano: D420296F5FEF486175FAA8F649DED00A5B0A096DB8D03972937542C51A7F296C
 
-$ # The address command shows the address for a seed and account index.
+$ # The address command shows the address for an account.
 $ pass nano | atto address
 nano_3cyb3rwp5ba47t5jdzm5o7apeduppsgzw8ockn1dqt4xcqgapta6gh5htnnh
+
+$ # With address and all following commands you can also provide an
+$ # alternative account index (default is 0):
+$ pass nano | atto -a 1 address
+nano_1o3igdpf8c4msdgwcop71x4o16zzkhe4kyku4axdi8iwh8wh13e4fwgherik
 
 $ # The balance command will receive pending funds automatically.
 $ pass nano | atto balance
