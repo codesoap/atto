@@ -56,11 +56,14 @@ Creating send block... done
 
 $ atto -h
 Usage:
+	atto -v
 	atto n[ew]
 	atto [-a ACCOUNT_INDEX] a[ddress]
 	atto [-a ACCOUNT_INDEX] b[alance]
 	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
 	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
+
+If the -v flag is provided, atto will print its version number.
 
 The new subcommand generates a new seed, which can later be used with
 the other subcommands.

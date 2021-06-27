@@ -7,11 +7,14 @@ import (
 )
 
 var usage = `Usage:
+	atto -v
 	atto n[ew]
 	atto [-a ACCOUNT_INDEX] a[ddress]
 	atto [-a ACCOUNT_INDEX] b[alance]
 	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
 	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
+
+If the -v flag is provided, atto will print its version number.
 
 The new subcommand generates a new seed, which can later be used with
 the other subcommands.
@@ -38,10 +41,16 @@ var accountIndexFlag uint
 var yFlag bool
 
 func init() {
+	var vFlag bool
 	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	flag.UintVar(&accountIndexFlag, "a", 0, "")
 	flag.BoolVar(&yFlag, "y", false, "")
+	flag.BoolVar(&vFlag, "v", false, "")
 	flag.Parse()
+	if vFlag {
+		fmt.Println("1.2.0")
+		os.Exit(0)
+	}
 	if flag.NArg() < 1 {
 		flag.Usage()
 		os.Exit(1)
