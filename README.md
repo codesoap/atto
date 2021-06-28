@@ -5,10 +5,9 @@ Disclaimer: I am no cryptographer and atto has not been audited. I
 cannot guarantee that atto is free of security compromising bugs.
 
 # Installation
-I recommend building atto yourself, but you can also
-download precompiled binaries from the [releases
-page](https://github.com/codesoap/atto/releases). Building atto yourself
-works like this; go 1.15 or higher is required:
+You can download precompiled binaries from the [releases
+page](https://github.com/codesoap/atto/releases) or build atto yourself
+like this; go 1.15 or higher is required:
 
 ```shell
 git clone 'https://github.com/codesoap/atto.git'
@@ -17,6 +16,9 @@ go build
 # The atto binary is now available at ./atto.
 # You could also install to ~/go/bin/ by executing "go install".
 ```
+
+For Arch Linux @kseistrup also made [atto available in the
+AUR](https://aur.archlinux.org/packages/atto/).
 
 # Usage
 ```console
