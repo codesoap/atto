@@ -93,7 +93,8 @@ atto is written with less than 1000 lines of code and uses minimal
 external dependencies. This makes it easy to audit the code yourself
 and ensure, that it does nothing you wouldn't want it to do.
 
-To change some defaults, take a look at `config.go`.
+To change some defaults, like the node to use, take a look at
+`config.go`.
 
 Signatures are created without the help of a node, to avoid your seed or
 private keys being stolen by a node operator. The received account info
