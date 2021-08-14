@@ -57,11 +57,7 @@ func init() {
 	}
 	var ok bool
 	switch flag.Arg(0)[:1] {
-	case "n":
-		ok = flag.NArg() == 1
-	case "a":
-		ok = flag.NArg() == 1
-	case "b":
+	case "n", "a", "b":
 		ok = flag.NArg() == 1
 	case "r":
 		ok = flag.NArg() == 2
