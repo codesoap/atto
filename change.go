@@ -23,7 +23,7 @@ func changeRepresentative() error {
 	}
 	representative := flag.Arg(1)
 	fmt.Fprintf(os.Stderr, "Creating change block... ")
-	err = changeRepresatativeOfAccount(info, representative, privateKey)
+	err = changeRepresentativeOfAccount(info, representative, privateKey)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "")
 		return err
@@ -32,7 +32,7 @@ func changeRepresentative() error {
 	return nil
 }
 
-func changeRepresatativeOfAccount(info accountInfo, representative string, privateKey *big.Int) error {
+func changeRepresentativeOfAccount(info accountInfo, representative string, privateKey *big.Int) error {
 	address, err := getAddress(privateKey)
 	if err != nil {
 		return err
