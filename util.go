@@ -1,29 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"math/big"
 	"net/http"
-	"os"
 	"strings"
 )
-
-// getSeed takes the first line of the standard input and interprets it
-// as a hexadecimal representation of a 32byte seed.
-func getSeed() (*big.Int, error) {
-	in := bufio.NewReader(os.Stdin)
-	firstLine, err := in.ReadString('\n')
-	if err != nil {
-		return nil, err
-	}
-	seed, ok := big.NewInt(0).SetString(strings.TrimSpace(firstLine), 16)
-	if !ok {
-		return nil, fmt.Errorf("could not parse seed")
-	}
-	return seed, nil
-}
 
 func base32Encode(in *big.Int) string {
 	alphabet := []byte("13456789abcdefghijkmnopqrstuwxyz")

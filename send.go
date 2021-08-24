@@ -13,17 +13,19 @@ import (
 func sendFunds() error {
 	amount := flag.Arg(1)
 	recipient := flag.Arg(2)
-	seed, err := getSeedForSending(amount, recipient)
+	account, err := ownAccount()
 	if err != nil {
 		return err
 	}
-	privateKey := getPrivateKey(seed, uint32(accountIndexFlag))
-	info, err := getAccountInfo(privateKey)
+	if err = letUserVerifySend(amount, recipient); err != nil {
+		return err
+	}
+	info, err := account.getInfo()
 	if err != nil {
 		return err
 	}
 	fmt.Fprintf(os.Stderr, "Creating send block... ")
-	err = sendFundsToAccount(info, amount, recipient, privateKey)
+	err = account.sendFundsToAccount(info, amount, recipient)
 	if err != nil {
 		return err
 	}
@@ -31,11 +33,7 @@ func sendFunds() error {
 	return nil
 }
 
-func getSeedForSending(amount, recipient string) (*big.Int, error) {
-	seed, err := getSeed()
-	if err != nil {
-		return nil, err
-	}
+func letUserVerifySend(amount, recipient string) (err error) {
 	if !yFlag {
 		fmt.Printf("Send %s NANO to %s? [y/N]: ", amount, recipient)
 
@@ -49,7 +47,7 @@ func getSeedForSending(amount, recipient string) (*big.Int, error) {
 		}
 		if err != nil {
 			msg := "could not open terminal for confirmation input: %v"
-			return nil, fmt.Errorf(msg, err)
+			return fmt.Errorf(msg, err)
 		}
 		defer tty.Close()
 
@@ -60,14 +58,10 @@ func getSeedForSending(amount, recipient string) (*big.Int, error) {
 			os.Exit(0)
 		}
 	}
-	return seed, nil
+	return
 }
 
-func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *big.Int) error {
-	address, err := getAddress(privateKey)
-	if err != nil {
-		return err
-	}
+func (a account) sendFundsToAccount(info accountInfo, amount, recipient string) error {
 	balance, err := getBalanceAfterSend(info.Balance, amount)
 	if err != nil {
 		return err
@@ -79,16 +73,16 @@ func sendFundsToAccount(info accountInfo, amount, recipient string, privateKey *
 	recipientBytes := bigIntToBytes(recipientNumber, 32)
 	block := block{
 		Type:           "state",
-		Account:        address,
+		Account:        a.address,
 		Previous:       info.Frontier,
 		Representative: info.Representative,
 		Balance:        balance.String(),
 		Link:           fmt.Sprintf("%064X", recipientBytes),
 	}
-	if err = block.sign(privateKey); err != nil {
+	if err = block.sign(a); err != nil {
 		return err
 	}
-	if err = block.addWork(sendWorkThreshold, privateKey); err != nil {
+	if err = block.addWork(sendWorkThreshold, a); err != nil {
 		return err
 	}
 	process := process{

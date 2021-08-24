@@ -29,12 +29,11 @@ type workGenerateResponse struct {
 	Work  string `json:"work"`
 }
 
-func (b *block) sign(privateKey *big.Int) error {
-	publicKey := derivePublicKey(privateKey)
-	if err := b.addHashIfUnhashed(publicKey); err != nil {
+func (b *block) sign(a account) error {
+	if err := b.addHashIfUnhashed(a); err != nil {
 		return err
 	}
-	signature, err := sign(privateKey, b.HashBytes)
+	signature, err := sign(a, b.HashBytes)
 	if err != nil {
 		return err
 	}
@@ -42,23 +41,23 @@ func (b *block) sign(privateKey *big.Int) error {
 	return nil
 }
 
-func (b *block) verifySignature(publicKey *big.Int) (err error) {
-	if err = b.addHashIfUnhashed(publicKey); err != nil {
+func (b *block) verifySignature(a account) (err error) {
+	if err = b.addHashIfUnhashed(a); err != nil {
 		return
 	}
 	sig, ok := big.NewInt(0).SetString(b.Signature, 16)
 	if !ok {
 		return fmt.Errorf("cannot parse '%s' as an integer", b.Signature)
 	}
-	if !isValidSignature(publicKey, b.HashBytes, bigIntToBytes(sig, 64)) {
+	if !isValidSignature(a, b.HashBytes, bigIntToBytes(sig, 64)) {
 		err = errInvalidSignature
 	}
 	return
 }
 
-func (b *block) addHashIfUnhashed(publicKey *big.Int) error {
+func (b *block) addHashIfUnhashed(a account) error {
 	if b.Hash == "" || len(b.HashBytes) == 0 {
-		hashBytes, err := b.hash(publicKey)
+		hashBytes, err := b.hash(a)
 		if err != nil {
 			return err
 		}
@@ -68,14 +67,14 @@ func (b *block) addHashIfUnhashed(publicKey *big.Int) error {
 	return nil
 }
 
-func (b *block) hash(publicKey *big.Int) ([]byte, error) {
+func (b *block) hash(a account) ([]byte, error) {
 	// See https://nanoo.tools/block for a reference.
 
 	msg := make([]byte, 176, 176)
 
 	msg[31] = 0x6 // block preamble
 
-	copy(msg[32:64], bigIntToBytes(publicKey, 32))
+	copy(msg[32:64], bigIntToBytes(a.publicKey, 32))
 
 	previous, err := hex.DecodeString(b.Previous)
 	if err != nil {
@@ -105,11 +104,10 @@ func (b *block) hash(publicKey *big.Int) ([]byte, error) {
 	return hash[:], nil
 }
 
-func (b *block) addWork(workThreshold uint64, privateKey *big.Int) error {
+func (b *block) addWork(workThreshold uint64, a account) error {
 	var hash string
 	if b.Previous == "0000000000000000000000000000000000000000000000000000000000000000" {
-		publicKey := derivePublicKey(privateKey)
-		hash = fmt.Sprintf("%064X", bigIntToBytes(publicKey, 32))
+		hash = fmt.Sprintf("%064X", bigIntToBytes(a.publicKey, 32))
 	} else {
 		hash = b.Previous
 	}

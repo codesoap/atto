@@ -1,12 +1,24 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"os"
+	"strings"
+
+	"filippo.io/edwards25519"
+	"golang.org/x/crypto/blake2b"
 )
 
 var errAccountNotFound = fmt.Errorf("account has not yet been opened")
+
+type account struct {
+	privateKey *big.Int
+	publicKey  *big.Int
+	address    string
+}
 
 type accountInfo struct {
 	Error          string `json:"error"`
@@ -20,16 +32,75 @@ type blockInfo struct {
 	Contents block  `json:"contents"`
 }
 
-func getAccountInfo(privateKey *big.Int) (info accountInfo, err error) {
-	address, err := getAddress(privateKey)
+// ownAccount initializes the own account using the seed provided via
+// standard input and accountIndexFlag.
+func ownAccount() (a account, err error) {
+	seed, err := getSeed()
 	if err != nil {
 		return
 	}
+	a.privateKey = getPrivateKey(seed, uint32(accountIndexFlag))
+	a.publicKey = derivePublicKey(a.privateKey)
+	a.address, err = getAddress(a.publicKey)
+	return
+}
+
+// getSeed takes the first line of the standard input and interprets it
+// as a hexadecimal representation of a 32byte seed.
+func getSeed() (*big.Int, error) {
+	in := bufio.NewReader(os.Stdin)
+	firstLine, err := in.ReadString('\n')
+	if err != nil {
+		return nil, err
+	}
+	seed, ok := big.NewInt(0).SetString(strings.TrimSpace(firstLine), 16)
+	if !ok {
+		return nil, fmt.Errorf("could not parse seed")
+	}
+	return seed, nil
+}
+
+func getPrivateKey(seed *big.Int, index uint32) *big.Int {
+	seedBytes := bigIntToBytes(seed, 32)
+	indexBytes := bigIntToBytes(big.NewInt(int64(index)), 4)
+	in := append(seedBytes, indexBytes...)
+	privateKeyBytes := blake2b.Sum256(in)
+	return big.NewInt(0).SetBytes(privateKeyBytes[:])
+}
+
+func derivePublicKey(privateKey *big.Int) *big.Int {
+	hashBytes := blake2b.Sum512(bigIntToBytes(privateKey, 32))
+	scalar := edwards25519.NewScalar().SetBytesWithClamping(hashBytes[:32])
+	publicKeyBytes := edwards25519.NewIdentityPoint().ScalarBaseMult(scalar).Bytes()
+	return big.NewInt(0).SetBytes(publicKeyBytes)
+}
+
+func getAddress(publicKey *big.Int) (string, error) {
+	base32PublicKey := base32Encode(publicKey)
+
+	hasher, err := blake2b.New(5, nil)
+	if err != nil {
+		return "", err
+	}
+	publicKeyBytes := bigIntToBytes(publicKey, 32)
+	if _, err := hasher.Write(publicKeyBytes); err != nil {
+		return "", err
+	}
+	hashBytes := hasher.Sum(nil)
+	base32Hash := base32Encode(big.NewInt(0).SetBytes(revertBytes(hashBytes)))
+
+	address := "nano_" +
+		strings.Repeat("1", 52-len(base32PublicKey)) + base32PublicKey +
+		strings.Repeat("1", 8-len(base32Hash)) + base32Hash
+	return address, nil
+}
+
+func (a account) getInfo() (info accountInfo, err error) {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "account_info",`+
 		`"account": "%s",`+
 		`"representative": "true"`+
-		`}`, address)
+		`}`, a.address)
 	responseBytes, err := doRPC(requestBody)
 	if err != nil {
 		return
@@ -44,14 +115,14 @@ func getAccountInfo(privateKey *big.Int) (info accountInfo, err error) {
 	} else if info.Error != "" {
 		err = fmt.Errorf("could not fetch account info: %s", info.Error)
 	} else {
-		err = verifyInfo(info, address)
+		err = a.verifyInfo(info)
 	}
 	return
 }
 
 // verifyInfo gets the frontier block of info, ensures that Hash,
 // Representative and Balance match and verifies it's signature.
-func verifyInfo(info accountInfo, address string) error {
+func (a account) verifyInfo(info accountInfo) error {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "block_info",`+
 		`"json_block": "true",`+
@@ -68,11 +139,7 @@ func verifyInfo(info accountInfo, address string) error {
 	if info.Error != "" {
 		return fmt.Errorf("could not get block info: %s", info.Error)
 	}
-	publicKey, err := getPublicKeyFromAddress(address)
-	if err != nil {
-		return err
-	}
-	if err = block.Contents.verifySignature(publicKey); err == errInvalidSignature ||
+	if err = block.Contents.verifySignature(a); err == errInvalidSignature ||
 		info.Frontier != block.Contents.Hash ||
 		info.Representative != block.Contents.Representative ||
 		info.Balance != block.Contents.Balance {

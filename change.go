@@ -3,23 +3,21 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math/big"
 	"os"
 )
 
 func changeRepresentative() error {
-	seed, err := getSeed()
+	account, err := ownAccount()
 	if err != nil {
 		return err
 	}
-	privateKey := getPrivateKey(seed, uint32(accountIndexFlag))
-	info, err := getAccountInfo(privateKey)
+	info, err := account.getInfo()
 	if err != nil {
 		return err
 	}
 	representative := flag.Arg(1)
 	fmt.Fprintf(os.Stderr, "Creating change block... ")
-	err = changeRepresentativeOfAccount(info, representative, privateKey)
+	err = account.changeRepresentativeOfAccount(info, representative)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "")
 		return err
@@ -28,23 +26,19 @@ func changeRepresentative() error {
 	return nil
 }
 
-func changeRepresentativeOfAccount(info accountInfo, representative string, privateKey *big.Int) error {
-	address, err := getAddress(privateKey)
-	if err != nil {
-		return err
-	}
+func (a account) changeRepresentativeOfAccount(info accountInfo, representative string) error {
 	block := block{
 		Type:           "state",
-		Account:        address,
+		Account:        a.address,
 		Previous:       info.Frontier,
 		Representative: representative,
 		Balance:        info.Balance,
 		Link:           "0000000000000000000000000000000000000000000000000000000000000000",
 	}
-	if err = block.sign(privateKey); err != nil {
+	if err := block.sign(a); err != nil {
 		return err
 	}
-	if err = block.addWork(changeWorkThreshold, privateKey); err != nil {
+	if err := block.addWork(changeWorkThreshold, a); err != nil {
 		return err
 	}
 	process := process{

@@ -34,13 +34,11 @@ type pendingBlockSource struct {
 }
 
 func printBalance() error {
-	seed, err := getSeed()
+	account, err := ownAccount()
 	if err != nil {
 		return err
 	}
-	privateKey := getPrivateKey(seed, uint32(accountIndexFlag))
-
-	info, err := getAccountInfo(privateKey)
+	info, err := account.getInfo()
 	if err == errAccountNotFound {
 		// This info is needed to create the first block:
 		info.Frontier = "0000000000000000000000000000000000000000000000000000000000000000"
@@ -49,7 +47,7 @@ func printBalance() error {
 	} else if err != nil {
 		return err
 	}
-	updatedBalance, err := receivePendingSends(info, privateKey)
+	updatedBalance, err := account.receivePendingSends(info)
 	if err != nil {
 		return err
 	}
@@ -57,17 +55,13 @@ func printBalance() error {
 	return nil
 }
 
-func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance *big.Int, err error) {
+func (a account) receivePendingSends(info accountInfo) (updatedBalance *big.Int, err error) {
 	updatedBalance, ok := big.NewInt(0).SetString(info.Balance, 10)
 	if !ok {
 		err = fmt.Errorf("cannot parse '%s' as an integer", info.Balance)
 		return
 	}
-	address, err := getAddress(privateKey)
-	if err != nil {
-		return
-	}
-	sends, err := getPendingSends(address)
+	sends, err := a.getPendingSends()
 	if err != nil {
 		return
 	}
@@ -84,16 +78,16 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 
 		block := block{
 			Type:           "state",
-			Account:        address,
+			Account:        a.address,
 			Previous:       previousBlock,
 			Representative: info.Representative,
 			Balance:        updatedBalance.String(),
 			Link:           blockHash,
 		}
-		if err = block.sign(privateKey); err != nil {
+		if err = block.sign(a); err != nil {
 			return
 		}
-		if err = block.addWork(receiveWorkThreshold, privateKey); err != nil {
+		if err = block.addWork(receiveWorkThreshold, a); err != nil {
 			return
 		}
 		process := process{
@@ -112,13 +106,13 @@ func receivePendingSends(info accountInfo, privateKey *big.Int) (updatedBalance 
 	return
 }
 
-func getPendingSends(address string) (sends pendingBlocks, err error) {
+func (a account) getPendingSends() (sends pendingBlocks, err error) {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "pending", `+
 		`"account": "%s", `+
 		`"include_only_confirmed": "true", `+
 		`"source": "true"`+
-		`}`, address)
+		`}`, a.address)
 	responseBytes, err := doRPC(requestBody)
 	if err != nil {
 		return

@@ -1,23 +1,20 @@
 package main
 
 import (
-	"math/big"
-
 	"filippo.io/edwards25519"
 	"golang.org/x/crypto/blake2b"
 )
 
-func sign(privateKey *big.Int, msg []byte) ([]byte, error) {
+func sign(a account, msg []byte) ([]byte, error) {
 	// This implementation based on the one from github.com/iotaledger/iota.go.
 
-	publicKey := derivePublicKey(privateKey)
 	signature := make([]byte, 64, 64)
 
 	h, err := blake2b.New512(nil)
 	if err != nil {
 		return signature, err
 	}
-	h.Write(bigIntToBytes(privateKey, 32))
+	h.Write(bigIntToBytes(a.privateKey, 32))
 
 	var digest1, messageDigest, hramDigest [64]byte
 	h.Sum(digest1[:0])
@@ -36,7 +33,7 @@ func sign(privateKey *big.Int, msg []byte) ([]byte, error) {
 
 	h.Reset()
 	h.Write(encodedR[:])
-	h.Write(bigIntToBytes(publicKey, 32))
+	h.Write(bigIntToBytes(a.publicKey, 32))
 	h.Write(msg)
 	h.Sum(hramDigest[:0])
 
@@ -49,10 +46,10 @@ func sign(privateKey *big.Int, msg []byte) ([]byte, error) {
 	return signature, nil
 }
 
-func isValidSignature(publicKey *big.Int, msg, sig []byte) bool {
+func isValidSignature(a account, msg, sig []byte) bool {
 	// This implementation based on the one from github.com/iotaledger/iota.go.
 
-	publicKeyBytes := bigIntToBytes(publicKey, 32)
+	publicKeyBytes := bigIntToBytes(a.publicKey, 32)
 
 	// ZIP215: this works because SetBytes does not check that encodings are canonical
 	A, err := new(edwards25519.Point).SetBytes(publicKeyBytes)
