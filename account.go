@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 )
 
 var errAccountNotFound = fmt.Errorf("account has not yet been opened")
@@ -19,7 +20,11 @@ type blockInfo struct {
 	Contents block  `json:"contents"`
 }
 
-func getAccountInfo(address string) (info accountInfo, err error) {
+func getAccountInfo(privateKey *big.Int) (info accountInfo, err error) {
+	address, err := getAddress(privateKey)
+	if err != nil {
+		return
+	}
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "account_info",`+
 		`"account": "%s",`+

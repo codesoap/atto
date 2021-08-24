@@ -13,11 +13,7 @@ func changeRepresentative() error {
 		return err
 	}
 	privateKey := getPrivateKey(seed, uint32(accountIndexFlag))
-	address, err := getAddress(privateKey)
-	if err != nil {
-		return err
-	}
-	info, err := getAccountInfo(address)
+	info, err := getAccountInfo(privateKey)
 	if err != nil {
 		return err
 	}
