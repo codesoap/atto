@@ -1,63 +1,41 @@
-package main
+package atto
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"os"
 	"strings"
 
 	"filippo.io/edwards25519"
 	"golang.org/x/crypto/blake2b"
 )
 
-var errAccountNotFound = fmt.Errorf("account has not yet been opened")
+// ErrAccountNotFound is used when an account could not be found by the
+// queried node.
+var ErrAccountNotFound = fmt.Errorf("account has not yet been opened")
 
-type account struct {
-	privateKey *big.Int
-	publicKey  *big.Int
-	address    string
-}
+// ErrAccountManipulated is used when it seems like an account has been
+// manipulated. This probably means someone is trying to steal funds.
+var ErrAccountManipulated = fmt.Errorf("the received account info has been manipulated")
 
-type accountInfo struct {
-	Error          string `json:"error"`
-	Frontier       string `json:"frontier"`
-	Representative string `json:"representative"`
-	Balance        string `json:"balance"`
+// Account holds the keys and address of a Nano account.
+type Account struct {
+	PrivateKey *big.Int
+	PublicKey  *big.Int
+	Address    string
 }
 
 type blockInfo struct {
 	Error    string `json:"error"`
-	Contents block  `json:"contents"`
+	Contents Block  `json:"contents"`
 }
 
-// ownAccount initializes the own account using the seed provided via
-// standard input and accountIndexFlag.
-func ownAccount() (a account, err error) {
-	seed, err := getSeed()
-	if err != nil {
-		return
-	}
-	a.privateKey = getPrivateKey(seed, uint32(accountIndexFlag))
-	a.publicKey = derivePublicKey(a.privateKey)
-	a.address, err = getAddress(a.publicKey)
+// NewAccount creates a new Account and populates all its fields.
+func NewAccount(seed *big.Int, index uint32) (a Account, err error) {
+	a.PrivateKey = getPrivateKey(seed, index)
+	a.PublicKey = derivePublicKey(a.PrivateKey)
+	a.Address, err = getAddress(a.PublicKey)
 	return
-}
-
-// getSeed takes the first line of the standard input and interprets it
-// as a hexadecimal representation of a 32byte seed.
-func getSeed() (*big.Int, error) {
-	in := bufio.NewReader(os.Stdin)
-	firstLine, err := in.ReadString('\n')
-	if err != nil {
-		return nil, err
-	}
-	seed, ok := big.NewInt(0).SetString(strings.TrimSpace(firstLine), 16)
-	if !ok {
-		return nil, fmt.Errorf("could not parse seed")
-	}
-	return seed, nil
 }
 
 func getPrivateKey(seed *big.Int, index uint32) *big.Int {
@@ -95,13 +73,20 @@ func getAddress(publicKey *big.Int) (string, error) {
 	return address, nil
 }
 
-func (a account) getInfo() (info accountInfo, err error) {
+// FetchAccountInfo fetches the AccountInfo of Account from the given
+// node.
+//
+// It is also verified, that the retreived AccountInfo is valid by
+// doing a block_info RPC for the frontier, verifying the signature
+// and ensuring that no fields have been changed in the account_info
+// response.
+func (a Account) FetchAccountInfo(node string) (info AccountInfo, err error) {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "account_info",`+
 		`"account": "%s",`+
 		`"representative": "true"`+
-		`}`, a.address)
-	responseBytes, err := doRPC(requestBody)
+		`}`, a.Address)
+	responseBytes, err := doRPC(requestBody, node)
 	if err != nil {
 		return
 	}
@@ -111,24 +96,26 @@ func (a account) getInfo() (info accountInfo, err error) {
 	// Need to check info.Error because of
 	// https://github.com/nanocurrency/nano-node/issues/1782.
 	if info.Error == "Account not found" {
-		err = errAccountNotFound
+		err = ErrAccountNotFound
 	} else if info.Error != "" {
 		err = fmt.Errorf("could not fetch account info: %s", info.Error)
 	} else {
-		err = a.verifyInfo(info)
+		info.PublicKey = a.PublicKey
+		info.Address = a.Address
+		err = a.verifyInfo(info, node)
 	}
 	return
 }
 
 // verifyInfo gets the frontier block of info, ensures that Hash,
 // Representative and Balance match and verifies it's signature.
-func (a account) verifyInfo(info accountInfo) error {
+func (a Account) verifyInfo(info AccountInfo, node string) error {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "block_info",`+
 		`"json_block": "true",`+
 		`"hash": "%s"`+
 		`}`, info.Frontier)
-	responseBytes, err := doRPC(requestBody)
+	responseBytes, err := doRPC(requestBody, node)
 	if err != nil {
 		return err
 	}
@@ -139,12 +126,36 @@ func (a account) verifyInfo(info accountInfo) error {
 	if info.Error != "" {
 		return fmt.Errorf("could not get block info: %s", info.Error)
 	}
+	if err = block.Contents.hash(info.PublicKey); err != nil {
+		return err
+	}
 	if err = block.Contents.verifySignature(a); err == errInvalidSignature ||
 		info.Frontier != block.Contents.Hash ||
 		info.Representative != block.Contents.Representative ||
 		info.Balance != block.Contents.Balance {
-		return fmt.Errorf("the received account info has been manipulated; " +
-			"change your node immediately!")
+		return ErrAccountManipulated
 	}
 	return err
+}
+
+// FetchPending fetches all unreceived blocks of Account from node.
+func (a Account) FetchPending(node string) (sends []Pending, err error) {
+	requestBody := fmt.Sprintf(`{`+
+		`"action": "pending", `+
+		`"account": "%s", `+
+		`"include_only_confirmed": "true", `+
+		`"source": "true"`+
+		`}`, a.Address)
+	responseBytes, err := doRPC(requestBody, node)
+	if err != nil {
+		return
+	}
+	var pending internalPending
+	err = json.Unmarshal(responseBytes, &pending)
+	// Need to check pending.Error because of
+	// https://github.com/nanocurrency/nano-node/issues/1782.
+	if err == nil && pending.Error != "" {
+		err = fmt.Errorf("could not fetch unreceived sends: %s", pending.Error)
+	}
+	return internalPendingToPending(pending), err
 }

@@ -1,4 +1,4 @@
-package main
+package atto
 
 import (
 	"fmt"
@@ -83,8 +83,8 @@ func revertBytes(in []byte) []byte {
 	return in
 }
 
-func doRPC(requestBody string) (responseBytes []byte, err error) {
-	resp, err := http.Post(nodeUrl, "application/json", strings.NewReader(requestBody))
+func doRPC(requestBody, node string) (responseBytes []byte, err error) {
+	resp, err := http.Post(node, "application/json", strings.NewReader(requestBody))
 	if err != nil {
 		return
 	}
@@ -96,8 +96,11 @@ func doRPC(requestBody string) (responseBytes []byte, err error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-func rawToNanoString(raw *big.Int) string {
-	rawPerKnano, _ := big.NewInt(0).SetString("1000000000000000000000000000", 10)
-	balance := big.NewInt(0).Div(raw, rawPerKnano).Uint64()
-	return fmt.Sprintf("%d.%03d NANO", balance/1000, balance%1000)
+func getPublicKeyFromAddress(address string) (*big.Int, error) {
+	if len(address) == 64 {
+		return base32Decode(address[4:56])
+	} else if len(address) == 65 {
+		return base32Decode(address[5:57])
+	}
+	return nil, fmt.Errorf("could not parse address %s", address)
 }

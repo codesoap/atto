@@ -1,5 +1,8 @@
+[![GoDoc](https://godoc.org/github.com/codesoap/atto?status.svg)](https://godoc.org/github.com/codesoap/atto)
+
 atto is a tiny Nano wallet, which focuses on ease of use through
-simplicity. 
+simplicity. Included is a rudimentary Go library to interact with Nano
+nodes.
 
 Disclaimer: I am no cryptographer and atto has not been audited. I
 cannot guarantee that atto is free of security compromising bugs.
@@ -89,12 +92,12 @@ the same seed. By default the account with index 0 is chosen.
 ```
 
 # Technical details
-atto is written with less than 1000 lines of code and uses minimal
-external dependencies. This makes it easy to audit the code yourself
-and ensure, that it does nothing you wouldn't want it to do.
+atto is written with ca. 1000 lines of code and uses minimal external
+dependencies. This makes it easy to audit the code yourself and ensure,
+that it does nothing you wouldn't want it to do.
 
 To change some defaults, like the node to use, take a look at
-`config.go`.
+`cmd/atto/config.go`.
 
 Signatures are created without the help of a node, to avoid your seed or
 private keys being stolen by a node operator. The received account info

@@ -1,4 +1,4 @@
-package main
+package atto
 
 import (
 	"encoding/json"
@@ -8,21 +8,21 @@ import (
 type process struct {
 	Action    string `json:"action"`
 	JsonBlock string `json:"json_block"`
-	Subtype   string `json:"subtype"`
-	Block     block  `json:"block"`
+	SubType   string `json:"subtype"`
+	Block     Block  `json:"block"`
 }
 
 type processResponse struct {
 	Error string `json:"error"`
 }
 
-func doProcessRPC(process process) error {
+func doProcessRPC(process process, node string) error {
 	var requestBody, responseBytes []byte
 	requestBody, err := json.Marshal(process)
 	if err != nil {
 		return err
 	}
-	responseBytes, err = doRPC(string(requestBody))
+	responseBytes, err = doRPC(string(requestBody), node)
 	if err != nil {
 		return err
 	}
