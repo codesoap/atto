@@ -18,11 +18,10 @@ var ErrAccountNotFound = fmt.Errorf("account has not yet been opened")
 // manipulated. This probably means someone is trying to steal funds.
 var ErrAccountManipulated = fmt.Errorf("the received account info has been manipulated")
 
-// Account holds the keys and address of a Nano account.
+// Account holds the public key and address of a Nano account.
 type Account struct {
-	PrivateKey *big.Int
-	PublicKey  *big.Int
-	Address    string
+	PublicKey *big.Int
+	Address   string
 }
 
 type blockInfo struct {
@@ -30,20 +29,19 @@ type blockInfo struct {
 	Contents Block  `json:"contents"`
 }
 
-// NewAccount creates a new Account and populates all its fields.
-func NewAccount(seed *big.Int, index uint32) (a Account, err error) {
-	a.PrivateKey = getPrivateKey(seed, index)
-	a.PublicKey = derivePublicKey(a.PrivateKey)
+// NewAccount creates a new Account and populates both its fields.
+func NewAccount(privateKey *big.Int) (a Account, err error) {
+	a.PublicKey = derivePublicKey(privateKey)
 	a.Address, err = getAddress(a.PublicKey)
 	return
 }
 
-func getPrivateKey(seed *big.Int, index uint32) *big.Int {
-	seedBytes := bigIntToBytes(seed, 32)
-	indexBytes := bigIntToBytes(big.NewInt(int64(index)), 4)
-	in := append(seedBytes, indexBytes...)
-	privateKeyBytes := blake2b.Sum256(in)
-	return big.NewInt(0).SetBytes(privateKeyBytes[:])
+// NewAccountFromAddress creates a new Account and populates both its
+// fields.
+func NewAccountFromAddress(address string) (a Account, err error) {
+	a.Address = address
+	a.PublicKey, err = getPublicKeyFromAddress(address)
+	return
 }
 
 func derivePublicKey(privateKey *big.Int) *big.Int {

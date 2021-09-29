@@ -6,7 +6,18 @@ import (
 	"math/big"
 	"net/http"
 	"strings"
+
+	"golang.org/x/crypto/blake2b"
 )
+
+// NewPrivateKey creates a private key from the given seed and index.
+func NewPrivateKey(seed *big.Int, index uint32) *big.Int {
+	seedBytes := bigIntToBytes(seed, 32)
+	indexBytes := bigIntToBytes(big.NewInt(int64(index)), 4)
+	in := append(seedBytes, indexBytes...)
+	privateKeyBytes := blake2b.Sum256(in)
+	return big.NewInt(0).SetBytes(privateKeyBytes[:])
+}
 
 func base32Encode(in *big.Int) string {
 	alphabet := []byte("13456789abcdefghijkmnopqrstuwxyz")

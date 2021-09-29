@@ -7,19 +7,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
-
-	"github.com/codesoap/atto"
 )
-
-// ownAccount initializes the own account using the seed provided via
-// standard input and accountIndexFlag.
-func ownAccount() (atto.Account, error) {
-	seed, err := getSeed()
-	if err != nil {
-		return atto.Account{}, err
-	}
-	return atto.NewAccount(seed, uint32(accountIndexFlag))
-}
 
 // getSeed takes the first line of the standard input and interprets it
 // as a hexadecimal representation of a 32byte seed.

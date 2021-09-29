@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+
+	"github.com/codesoap/atto"
 )
 
 var usage = `Usage:
@@ -102,7 +104,12 @@ func printNewSeed() error {
 }
 
 func printAddress() error {
-	account, err := ownAccount()
+	seed, err := getSeed()
+	if err != nil {
+		return err
+	}
+	privateKey := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	account, err := atto.NewAccount(privateKey)
 	if err == nil {
 		fmt.Println(account.Address)
 	}
@@ -110,7 +117,12 @@ func printAddress() error {
 }
 
 func printBalance() error {
-	account, err := ownAccount()
+	seed, err := getSeed()
+	if err != nil {
+		return err
+	}
+	privateKey := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	account, err := atto.NewAccount(privateKey)
 	if err != nil {
 		return err
 	}
@@ -133,7 +145,7 @@ func printBalance() error {
 		if err != nil {
 			return err
 		}
-		if err = block.Sign(account.PublicKey, account.PrivateKey); err != nil {
+		if err = block.Sign(account.PublicKey, privateKey); err != nil {
 			return err
 		}
 		if err = block.FetchWork(sendWorkThreshold, account.PublicKey, node); err != nil {
@@ -154,7 +166,12 @@ func printBalance() error {
 
 func changeRepresentative() error {
 	representative := flag.Arg(1)
-	account, err := ownAccount()
+	seed, err := getSeed()
+	if err != nil {
+		return err
+	}
+	privateKey := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	account, err := atto.NewAccount(privateKey)
 	if err != nil {
 		return err
 	}
@@ -168,7 +185,7 @@ func changeRepresentative() error {
 	if err != nil {
 		return err
 	}
-	if err = block.Sign(account.PublicKey, account.PrivateKey); err != nil {
+	if err = block.Sign(account.PublicKey, privateKey); err != nil {
 		return err
 	}
 	if err = block.FetchWork(sendWorkThreshold, account.PublicKey, node); err != nil {
@@ -184,7 +201,12 @@ func changeRepresentative() error {
 func sendFunds() error {
 	amount := flag.Arg(1)
 	recipient := flag.Arg(2)
-	account, err := ownAccount()
+	seed, err := getSeed()
+	if err != nil {
+		return err
+	}
+	privateKey := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	account, err := atto.NewAccount(privateKey)
 	if err != nil {
 		return err
 	}
@@ -201,7 +223,7 @@ func sendFunds() error {
 	if err != nil {
 		return err
 	}
-	if err = block.Sign(account.PublicKey, account.PrivateKey); err != nil {
+	if err = block.Sign(account.PublicKey, privateKey); err != nil {
 		return err
 	}
 	if err = block.FetchWork(sendWorkThreshold, account.PublicKey, node); err != nil {
