@@ -39,12 +39,13 @@ func (i *AccountInfo) Send(toAddr, amount string) (Block, error) {
 		Type:           "state",
 		SubType:        "send",
 		Account:        i.Address,
+		PublicKey:      i.PublicKey,
 		Previous:       i.Frontier,
 		Representative: i.Representative,
 		Balance:        balance.String(),
 		Link:           fmt.Sprintf("%064X", recipientBytes),
 	}
-	err = block.hash(i.PublicKey)
+	err = block.hash()
 	i.Frontier = block.Hash
 	i.Balance = block.Balance
 	return block, err
@@ -92,12 +93,13 @@ func (i *AccountInfo) Change(representative string) (Block, error) {
 		Type:           "state",
 		SubType:        "change",
 		Account:        i.Address,
+		PublicKey:      i.PublicKey,
 		Previous:       i.Frontier,
 		Representative: representative,
 		Balance:        i.Balance,
 		Link:           "0000000000000000000000000000000000000000000000000000000000000000",
 	}
-	err := block.hash(i.PublicKey)
+	err := block.hash()
 	i.Frontier = block.Hash
 	return block, err
 }
@@ -121,12 +123,13 @@ func (i *AccountInfo) Receive(pending Pending) (Block, error) {
 		Type:           "state",
 		SubType:        "receive",
 		Account:        i.Address,
+		PublicKey:      i.PublicKey,
 		Previous:       i.Frontier,
 		Representative: i.Representative,
 		Balance:        updatedBalance.String(),
 		Link:           pending.Hash,
 	}
-	err := block.hash(i.PublicKey)
+	err := block.hash()
 	i.Frontier = block.Hash
 	i.Balance = block.Balance
 	return block, err

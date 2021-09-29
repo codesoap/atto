@@ -124,7 +124,7 @@ func (a Account) verifyInfo(info AccountInfo, node string) error {
 	if info.Error != "" {
 		return fmt.Errorf("could not get block info: %s", info.Error)
 	}
-	if err = block.Contents.hash(info.PublicKey); err != nil {
+	if err = block.Contents.hash(); err != nil {
 		return err
 	}
 	if err = block.Contents.verifySignature(a); err == errInvalidSignature ||
