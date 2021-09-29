@@ -78,7 +78,7 @@ func getAddress(publicKey *big.Int) (string, error) {
 // doing a block_info RPC for the frontier, verifying the signature
 // and ensuring that no fields have been changed in the account_info
 // response.
-func (a Account) FetchAccountInfo(node string) (info AccountInfo, err error) {
+func (a Account) FetchAccountInfo(node string) (i AccountInfo, err error) {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "account_info",`+
 		`"account": "%s",`+
@@ -88,19 +88,19 @@ func (a Account) FetchAccountInfo(node string) (info AccountInfo, err error) {
 	if err != nil {
 		return
 	}
-	if err = json.Unmarshal(responseBytes, &info); err != nil {
+	if err = json.Unmarshal(responseBytes, &i); err != nil {
 		return
 	}
-	// Need to check info.Error because of
+	// Need to check i.Error because of
 	// https://github.com/nanocurrency/nano-node/issues/1782.
-	if info.Error == "Account not found" {
+	if i.Error == "Account not found" {
 		err = ErrAccountNotFound
-	} else if info.Error != "" {
-		err = fmt.Errorf("could not fetch account info: %s", info.Error)
+	} else if i.Error != "" {
+		err = fmt.Errorf("could not fetch account info: %s", i.Error)
 	} else {
-		info.PublicKey = a.PublicKey
-		info.Address = a.Address
-		err = a.verifyInfo(info, node)
+		i.PublicKey = a.PublicKey
+		i.Address = a.Address
+		err = a.verifyInfo(i, node)
 	}
 	return
 }
@@ -137,7 +137,7 @@ func (a Account) verifyInfo(info AccountInfo, node string) error {
 }
 
 // FetchPending fetches all unreceived blocks of Account from node.
-func (a Account) FetchPending(node string) (sends []Pending, err error) {
+func (a Account) FetchPending(node string) ([]Pending, error) {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "pending", `+
 		`"account": "%s", `+
@@ -146,7 +146,7 @@ func (a Account) FetchPending(node string) (sends []Pending, err error) {
 		`}`, a.Address)
 	responseBytes, err := doRPC(requestBody, node)
 	if err != nil {
-		return
+		return nil, err
 	}
 	var pending internalPending
 	err = json.Unmarshal(responseBytes, &pending)
