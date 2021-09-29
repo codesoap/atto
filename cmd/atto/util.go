@@ -9,19 +9,14 @@ import (
 	"strings"
 )
 
-// getSeed takes the first line of the standard input and interprets it
-// as a hexadecimal representation of a 32byte seed.
-func getSeed() (*big.Int, error) {
+// getSeed returns the first line of the standard input.
+func getSeed() (string, error) {
 	in := bufio.NewReader(os.Stdin)
 	firstLine, err := in.ReadString('\n')
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	seed, ok := big.NewInt(0).SetString(strings.TrimSpace(firstLine), 16)
-	if !ok {
-		return nil, fmt.Errorf("could not parse seed")
-	}
-	return seed, nil
+	return strings.TrimSpace(firstLine), nil
 }
 
 func rawToNanoString(raw *big.Int) string {

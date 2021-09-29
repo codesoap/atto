@@ -1,6 +1,7 @@
 package atto
 
 import (
+	"crypto/rand"
 	"fmt"
 	"io/ioutil"
 	"math/big"
@@ -10,13 +11,24 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
+// GenerateSeed generates a new random seed.
+func GenerateSeed() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	return fmt.Sprintf("%X\n", b), err
+}
+
 // NewPrivateKey creates a private key from the given seed and index.
-func NewPrivateKey(seed *big.Int, index uint32) *big.Int {
-	seedBytes := bigIntToBytes(seed, 32)
+func NewPrivateKey(seed string, index uint32) (*big.Int, error) {
+	seedInt, ok := big.NewInt(0).SetString(seed, 16)
+	if !ok {
+		return nil, fmt.Errorf("could not parse seed")
+	}
+	seedBytes := bigIntToBytes(seedInt, 32)
 	indexBytes := bigIntToBytes(big.NewInt(int64(index)), 4)
 	in := append(seedBytes, indexBytes...)
 	privateKeyBytes := blake2b.Sum256(in)
-	return big.NewInt(0).SetBytes(privateKeyBytes[:])
+	return big.NewInt(0).SetBytes(privateKeyBytes[:]), nil
 }
 
 func base32Encode(in *big.Int) string {

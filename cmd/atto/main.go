@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
 	"flag"
 	"fmt"
 	"math/big"
@@ -95,12 +94,11 @@ func main() {
 }
 
 func printNewSeed() error {
-	b := make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
-		return err
+	seed, err := atto.GenerateSeed()
+	if err == nil {
+		fmt.Println(seed)
 	}
-	fmt.Printf("%X\n", b)
-	return nil
+	return err
 }
 
 func printAddress() error {
@@ -108,7 +106,10 @@ func printAddress() error {
 	if err != nil {
 		return err
 	}
-	privateKey := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	privateKey, err := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	if err != nil {
+		return err
+	}
 	account, err := atto.NewAccount(privateKey)
 	if err == nil {
 		fmt.Println(account.Address)
@@ -121,7 +122,10 @@ func printBalance() error {
 	if err != nil {
 		return err
 	}
-	privateKey := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	privateKey, err := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	if err != nil {
+		return err
+	}
 	account, err := atto.NewAccount(privateKey)
 	if err != nil {
 		return err
@@ -170,7 +174,10 @@ func changeRepresentative() error {
 	if err != nil {
 		return err
 	}
-	privateKey := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	privateKey, err := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	if err != nil {
+		return err
+	}
 	account, err := atto.NewAccount(privateKey)
 	if err != nil {
 		return err
@@ -205,7 +212,10 @@ func sendFunds() error {
 	if err != nil {
 		return err
 	}
-	privateKey := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	privateKey, err := atto.NewPrivateKey(seed, uint32(accountIndexFlag))
+	if err != nil {
+		return err
+	}
 	account, err := atto.NewAccount(privateKey)
 	if err != nil {
 		return err
