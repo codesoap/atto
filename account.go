@@ -124,6 +124,7 @@ func (a Account) verifyInfo(info AccountInfo, node string) error {
 	if info.Error != "" {
 		return fmt.Errorf("could not get block info: %s", info.Error)
 	}
+	block.Contents.PublicKey = a.PublicKey
 	if err = block.Contents.hash(); err != nil {
 		return err
 	}
