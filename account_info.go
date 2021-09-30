@@ -118,6 +118,10 @@ func (i *AccountInfo) Receive(pending Pending) (Block, error) {
 		err := fmt.Errorf("cannot parse '%s' as an integer", pending.Amount)
 		return Block{}, err
 	}
+	if amount.Sign() < 1 {
+		err := fmt.Errorf("amount '%s' is not positive", pending.Amount)
+		return Block{}, err
+	}
 	updatedBalance.Add(updatedBalance, amount)
 	block := Block{
 		Type:           "state",
