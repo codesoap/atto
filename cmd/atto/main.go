@@ -229,7 +229,7 @@ func sendFunds() error {
 	}
 
 	fmt.Fprintf(os.Stderr, "Creating send block... ")
-	block, err := info.Send(recipient, amount)
+	block, err := info.Send(amount, recipient)
 	if err != nil {
 		return err
 	}

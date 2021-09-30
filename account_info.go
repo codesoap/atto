@@ -25,7 +25,7 @@ type AccountInfo struct {
 // Send creates a send block, which is hashed but missing the signature
 // and work. The Frontier and Balance of the AccountInfo will be
 // updated. The amount is interpreted as Nano, not raw!
-func (i *AccountInfo) Send(toAddr, amount string) (Block, error) {
+func (i *AccountInfo) Send(amount, toAddr string) (Block, error) {
 	balance, err := getBalanceAfterSend(i.Balance, amount)
 	if err != nil {
 		return Block{}, err
