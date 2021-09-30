@@ -109,6 +109,9 @@ file system. This makes atto very portable, but also means, that
 no history is stored locally. I recommend using a service like
 https://nanocrawler.cc/ to investigate transaction history.
 
+# Offline signing
+See [atto-safesign](cmd/atto-safesign/).
+
 # Donations
 If you want to show your appreciation for atto, you can donate to me at
 `nano_1i7wsbehgwhxct91wpojr1j588ydikd64uc7p3kj54nofqioc6ydjopezf13`.
