@@ -21,18 +21,18 @@ var ErrWorkMissing = fmt.Errorf("work is missing")
 
 // Block represents a block in the block chain of an account.
 type Block struct {
-	Type           string   `json:"type"`
+	Type           string `json:"type"`
+	Account        string `json:"account"`
+	Previous       string `json:"previous"`
+	Representative string `json:"representative"`
+	Balance        string `json:"balance"`
+	Link           string `json:"link"`
+	Signature      string `json:"signature"`
+	Work           string `json:"work"`
+
+	// This field is not part of the JSON but needed to improve the
+	// performance of FetchWork and the security of Submit.
 	SubType        string   `json:"-"`
-	Account        string   `json:"account"`
-	PublicKey      *big.Int `json:"-"`
-	Previous       string   `json:"previous"`
-	Representative string   `json:"representative"`
-	Balance        string   `json:"balance"`
-	Link           string   `json:"link"`
-	Signature      string   `json:"signature"`
-	Work           string   `json:"work"`
-	Hash           string   `json:"-"`
-	HashBytes      []byte   `json:"-"`
 }
 
 type workGenerateResponse struct {
@@ -42,7 +42,15 @@ type workGenerateResponse struct {
 
 // Sign computes and sets the Signature of b.
 func (b *Block) Sign(privateKey *big.Int) error {
-	signature, err := sign(b.PublicKey, privateKey, b.HashBytes)
+	publicKey, err := getPublicKeyFromAddress(b.Account)
+	if err != nil {
+		return err
+	}
+	hash, err := b.hash()
+	if err != nil {
+		return err
+	}
+	signature, err := sign(publicKey, privateKey, hash)
 	if err != nil {
 		return err
 	}
@@ -55,7 +63,11 @@ func (b *Block) verifySignature(a Account) (err error) {
 	if !ok {
 		return fmt.Errorf("cannot parse '%s' as an integer", b.Signature)
 	}
-	if !isValidSignature(a.PublicKey, b.HashBytes, bigIntToBytes(sig, 64)) {
+	hash, err := b.hash()
+	if err != nil {
+		return err
+	}
+	if !isValidSignature(a.PublicKey, hash, bigIntToBytes(sig, 64)) {
 		err = errInvalidSignature
 	}
 	return
@@ -66,7 +78,11 @@ func (b *Block) verifySignature(a Account) (err error) {
 func (b *Block) FetchWork(node string) error {
 	var hash string
 	if b.Previous == "0000000000000000000000000000000000000000000000000000000000000000" {
-		hash = fmt.Sprintf("%064X", bigIntToBytes(b.PublicKey, 32))
+		publicKey, err := getPublicKeyFromAddress(b.Account)
+		if err != nil {
+			return err
+		}
+		hash = fmt.Sprintf("%064X", bigIntToBytes(publicKey, 32))
 	} else {
 		hash = b.Previous
 	}
@@ -96,43 +112,45 @@ func (b *Block) FetchWork(node string) error {
 	return nil
 }
 
-func (b *Block) hash() error {
+func (b *Block) hash() ([]byte, error) {
 	// See https://nanoo.tools/block for a reference.
 
 	msg := make([]byte, 176, 176)
 
 	msg[31] = 0x6 // block preamble
 
-	copy(msg[32:64], bigIntToBytes(b.PublicKey, 32))
+	publicKey, err := getPublicKeyFromAddress(b.Account)
+	if err != nil {
+		return nil, err
+	}
+	copy(msg[32:64], bigIntToBytes(publicKey, 32))
 
 	previous, err := hex.DecodeString(b.Previous)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	copy(msg[64:96], previous)
 
 	representative, err := getPublicKeyFromAddress(b.Representative)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	copy(msg[96:128], bigIntToBytes(representative, 32))
 
 	balance, ok := big.NewInt(0).SetString(b.Balance, 10)
 	if !ok {
-		return fmt.Errorf("cannot parse '%s' as an integer", b.Balance)
+		return nil, fmt.Errorf("cannot parse '%s' as an integer", b.Balance)
 	}
 	copy(msg[128:144], bigIntToBytes(balance, 16))
 
 	link, err := hex.DecodeString(b.Link)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	copy(msg[144:176], link)
 
 	hash := blake2b.Sum256(msg)
-	b.HashBytes = hash[:]
-	b.Hash = fmt.Sprintf("%064X", b.HashBytes)
-	return nil
+	return hash[:], nil
 }
 
 // Submit submits the Block to the given node. Work and Signature of b

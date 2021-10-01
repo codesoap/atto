@@ -124,12 +124,12 @@ func (a Account) verifyInfo(info AccountInfo, node string) error {
 	if info.Error != "" {
 		return fmt.Errorf("could not get block info: %s", info.Error)
 	}
-	block.Contents.PublicKey = a.PublicKey
-	if err = block.Contents.hash(); err != nil {
+	hash, err := block.Contents.hash()
+	if err != nil {
 		return err
 	}
 	if err = block.Contents.verifySignature(a); err == errInvalidSignature ||
-		info.Frontier != block.Contents.Hash ||
+		info.Frontier != fmt.Sprintf("%064X", hash) ||
 		info.Representative != block.Contents.Representative ||
 		info.Balance != block.Contents.Balance {
 		return ErrAccountManipulated
