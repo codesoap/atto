@@ -37,7 +37,7 @@ func (i *AccountInfo) Send(amount, toAddr string) (Block, error) {
 	recipientBytes := bigIntToBytes(recipientNumber, 32)
 	block := Block{
 		Type:           "state",
-		SubType:        "send",
+		SubType:        SubTypeSend,
 		Account:        i.Address,
 		Previous:       i.Frontier,
 		Representative: i.Representative,
@@ -93,7 +93,7 @@ func nanoStringToRaw(amountString string) (*big.Int, error) {
 func (i *AccountInfo) Change(representative string) (Block, error) {
 	block := Block{
 		Type:           "state",
-		SubType:        "change",
+		SubType:        SubTypeChange,
 		Account:        i.Address,
 		Previous:       i.Frontier,
 		Representative: representative,
@@ -129,7 +129,7 @@ func (i *AccountInfo) Receive(pending Pending) (Block, error) {
 	updatedBalance.Add(updatedBalance, amount)
 	block := Block{
 		Type:           "state",
-		SubType:        "receive",
+		SubType:        SubTypeReceive,
 		Account:        i.Address,
 		Previous:       i.Frontier,
 		Representative: i.Representative,

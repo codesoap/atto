@@ -19,6 +19,15 @@ var ErrSignatureMissing = fmt.Errorf("signature is missing")
 // required for the attempted operation.
 var ErrWorkMissing = fmt.Errorf("work is missing")
 
+// BlockSubType represents the sub-type of a block.
+type BlockSubType int64
+
+const (
+	SubTypeReceive BlockSubType = iota
+	SubTypeChange
+	SubTypeSend
+)
+
 // Block represents a block in the block chain of an account.
 type Block struct {
 	Type           string `json:"type"`
@@ -32,7 +41,7 @@ type Block struct {
 
 	// This field is not part of the JSON but needed to improve the
 	// performance of FetchWork and the security of Submit.
-	SubType        string   `json:"-"`
+	SubType BlockSubType `json:"-"`
 }
 
 type workGenerateResponse struct {
@@ -88,7 +97,7 @@ func (b *Block) FetchWork(node string) error {
 	}
 
 	requestBody := fmt.Sprintf(`{"action":"work_generate", "hash":"%s"`, string(hash))
-	if b.SubType == "receive" {
+	if b.SubType == SubTypeReceive {
 		// Receive blocks need less work, so lower the difficulity.
 		var receiveWorkThreshold uint64 = 0xfffffe0000000000
 		requestBody += fmt.Sprintf(`, "difficulty":"%016x"`, receiveWorkThreshold)
@@ -162,10 +171,19 @@ func (b Block) Submit(node string) error {
 	if b.Signature == "" {
 		return ErrSignatureMissing
 	}
+	var subType string
+	switch b.SubType {
+	case SubTypeReceive:
+		subType = "receive"
+	case SubTypeChange:
+		subType = "change"
+	case SubTypeSend:
+		subType = "send"
+	}
 	process := process{
 		Action:    "process",
 		JsonBlock: "true",
-		SubType:   b.SubType,
+		SubType:   subType,
 		Block:     b,
 	}
 	return doProcessRPC(process, node)
