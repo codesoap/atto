@@ -21,7 +21,11 @@ func getSeed() (string, error) {
 
 func rawToNanoString(raw *big.Int) string {
 	rawPerKnano, _ := big.NewInt(0).SetString("1000000000000000000000000000", 10)
-	balance := big.NewInt(0).Div(raw, rawPerKnano).Uint64()
+	balance := big.NewInt(0).Div(raw, rawPerKnano).Int64()
+	if balance < 0 {
+		balance = -balance
+		return fmt.Sprintf("-%d.%03d NANO", balance/1000, balance%1000)
+	}
 	return fmt.Sprintf("%d.%03d NANO", balance/1000, balance%1000)
 }
 
