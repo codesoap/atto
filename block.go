@@ -55,7 +55,7 @@ func (b *Block) Sign(privateKey *big.Int) error {
 	if err != nil {
 		return err
 	}
-	hash, err := b.hash()
+	hash, err := b.hashBytes()
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (b *Block) verifySignature(a Account) (err error) {
 	if !ok {
 		return fmt.Errorf("cannot parse '%s' as an integer", b.Signature)
 	}
-	hash, err := b.hash()
+	hash, err := b.hashBytes()
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,17 @@ func (b *Block) FetchWork(node string) error {
 	return nil
 }
 
-func (b *Block) hash() ([]byte, error) {
+// Hash calculates the block's hash and returns it's string
+// representation.
+func (b Block) Hash() (string, error) {
+	hashBytes, err := b.hashBytes()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%064X", hashBytes), nil
+}
+
+func (b Block) hashBytes() ([]byte, error) {
 	// See https://nanoo.tools/block for a reference.
 
 	msg := make([]byte, 176, 176)

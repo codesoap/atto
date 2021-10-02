@@ -44,11 +44,11 @@ func (i *AccountInfo) Send(amount, toAddr string) (Block, error) {
 		Balance:        balance.String(),
 		Link:           fmt.Sprintf("%064X", recipientBytes),
 	}
-	hash, err := block.hash()
+	hash, err := block.Hash()
 	if err != nil {
 		return Block{}, err
 	}
-	i.Frontier = fmt.Sprintf("%064X", hash)
+	i.Frontier = hash
 	i.Balance = block.Balance
 	return block, err
 }
@@ -100,11 +100,11 @@ func (i *AccountInfo) Change(representative string) (Block, error) {
 		Balance:        i.Balance,
 		Link:           "0000000000000000000000000000000000000000000000000000000000000000",
 	}
-	hash, err := block.hash()
+	hash, err := block.Hash()
 	if err != nil {
 		return Block{}, err
 	}
-	i.Frontier = fmt.Sprintf("%064X", hash)
+	i.Frontier = hash
 	return block, err
 }
 
@@ -136,11 +136,11 @@ func (i *AccountInfo) Receive(pending Pending) (Block, error) {
 		Balance:        updatedBalance.String(),
 		Link:           pending.Hash,
 	}
-	hash, err := block.hash()
+	hash, err := block.Hash()
 	if err != nil {
 		return Block{}, err
 	}
-	i.Frontier = fmt.Sprintf("%064X", hash)
+	i.Frontier = hash
 	i.Balance = block.Balance
 	return block, err
 }
