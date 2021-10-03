@@ -1,4 +1,8 @@
-# Creating blocks from an offline computer
+`atto-safesign` is intended to be used as an extension to `atto`, so I
+strongly recommend you familiarize yourself with `atto` before looking
+at `atto-safesign`.
+
+# Motivation
 If you want to keep your seed extra safe you may choose to never take
 it onto a computer that is connected to the internet. `atto-safesign`
 enables you to do this by creating a file which contains initially
@@ -6,14 +10,10 @@ unsigned blocks. The blocks in this file can then be signed on the
 offline computer and transferred back to the online computer to submit
 the blocks to the Nano network.
 
-To transfer data between the off- and online computer, you can use a
-USB thumb drive, but make sure that there is no maleware on the drive.
-A safer alternative could be to use QR codes (e.g. with the tools
-`qrencode` and `zbarimg`), to transfer the atto file with the blocks to
-and from the offline computer after manually checking the contents of
-the file.
-
 # Usage
+Here is an example use case where pending sends are received and the
+representative changed:
+
 ```
 online$ # These steps take place on an online computer:
 online$ echo $MY_PUBLIC_KEY | atto-safesign test.atto receive
@@ -23,10 +23,11 @@ offline$ # The sign subcommand can then be used on an offline computer:
 offline$ pass nano | atto-safesign test.atto sign
 
 online$ # Back at the online computer, the now signed blocks can be submitted:
-online$ atto-safesign test.atto submit
+online$ echo $MY_PUBLIC_KEY | atto-safesign test.atto submit
 ```
 
-```
+This is `atto-safesign`'s help text:
+```console
 $ atto-safesign -h
 Usage:
         atto-safesign -v
