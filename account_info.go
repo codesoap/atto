@@ -89,7 +89,8 @@ func nanoStringToRaw(amountString string) (*big.Int, error) {
 }
 
 // Change creates a change block, which is hashed but missing the
-// signature and work. The Frontier of the AccountInfo will be updated.
+// signature and work. The Frontier and Representative of the
+// AccountInfo will be updated.
 func (i *AccountInfo) Change(representative string) (Block, error) {
 	block := Block{
 		Type:           "state",
