@@ -66,10 +66,6 @@ func getBlocksFromFile() ([]atto.Block, error) {
 		} else if err != nil {
 			return nil, err
 		}
-		if len(line) < 2 || line[0] == '#' {
-			// Skip empty and comment lines
-			continue
-		}
 		var block atto.Block
 		if err = json.Unmarshal(line, &block); err != nil {
 			return nil, err
