@@ -29,7 +29,7 @@ const (
 	// SubTypeChange denotes blocks which change the representative.
 	SubTypeChange
 
-	// SubTypeSend denotes block which lower the balance.
+	// SubTypeSend denotes blocks which lower the balance.
 	SubTypeSend
 )
 
