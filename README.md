@@ -74,8 +74,8 @@ The new subcommand generates a new seed, which can later be used with
 the other subcommands.
 
 The address, balance, representative and send subcommands expect a seed
-as as the first line of their standard input. Showing the first address
-of a newly generated key could work like this:
+as the first line of their standard input. Showing the first address of
+a newly generated key could work like this:
 atto new | tee seed.txt | atto address
 
 The send subcommand also expects manual confirmation of the transaction,
