@@ -23,8 +23,13 @@ var ErrWorkMissing = fmt.Errorf("work is missing")
 type BlockSubType int64
 
 const (
+	// SubTypeReceive denotes blocks which raise the balance.
 	SubTypeReceive BlockSubType = iota
+
+	// SubTypeChange denotes blocks which change the representative.
 	SubTypeChange
+
+	// SubTypeSend denotes block which lower the balance.
 	SubTypeSend
 )
 
