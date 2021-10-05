@@ -98,7 +98,7 @@ func (b *Block) FetchWork(node string) error {
 
 	requestBody := fmt.Sprintf(`{"action":"work_generate", "hash":"%s"`, string(hash))
 	if b.SubType == SubTypeReceive {
-		// Receive blocks need less work, so lower the difficulity.
+		// Receive blocks need less work, so lower the difficulty.
 		var receiveWorkThreshold uint64 = 0xfffffe0000000000
 		requestBody += fmt.Sprintf(`, "difficulty":"%016x"`, receiveWorkThreshold)
 	}
