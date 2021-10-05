@@ -29,14 +29,15 @@ representative changed:
 
 ```
 online$ # These steps take place on an online computer:
-online$ echo $MY_PUBLIC_KEY | atto-safesign test.atto receive
-online$ echo $MY_PUBLIC_KEY | atto-safesign test.atto representative nano_3up3y8cd3hhs7zdpmkpssgb1iyjpke3xwmgqy8rg58z1hwryqpjqnkuqayps
+online$ MY_ADDRESS=nano_1yqtxctufmrgfa5aq8gqa3eyr45hsghqau8ihe7hzaq1tdggjxsqbbkqofi7
+online$ echo $MY_ADDRESS | atto-safesign test.atto receive
+online$ echo $MY_ADDRESS | atto-safesign test.atto representative nano_3up3y8cd3hhs7zdpmkpssgb1iyjpke3xwmgqy8rg58z1hwryqpjqnkuqayps
 
 offline$ # The sign subcommand can then be used on an offline computer:
 offline$ pass nano | atto-safesign test.atto sign
 
 online$ # Back at the online computer, the now signed blocks can be submitted:
-online$ echo $MY_PUBLIC_KEY | atto-safesign test.atto submit
+online$ echo $MY_ADDRESS | atto-safesign test.atto submit
 ```
 
 This is `atto-safesign`'s help text:
