@@ -10,6 +10,19 @@ unsigned blocks. The blocks in this file can then be signed on the
 offline computer and transferred back to the online computer to submit
 the blocks to the Nano network.
 
+# Installation
+You can download precompiled binaries from the [releases
+page](https://github.com/codesoap/atto/releases) or build atto-safesign
+yourself like this; go 1.15 or higher is required:
+
+```shell
+git clone 'https://github.com/codesoap/atto.git'
+cd atto
+go build ./cmd/atto-safesign/
+# The atto-safesign binary is now available at ./atto-safesign. You could
+# also install to ~/go/bin/ by executing "go install ./cmd/atto-safesign/".
+```
+
 # Usage
 Here is an example use case where pending sends are received and the
 representative changed:

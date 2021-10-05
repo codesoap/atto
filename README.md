@@ -15,9 +15,9 @@ like this; go 1.15 or higher is required:
 ```shell
 git clone 'https://github.com/codesoap/atto.git'
 cd atto
-go build
-# The atto binary is now available at ./atto.
-# You could also install to ~/go/bin/ by executing "go install".
+go build ./cmd/atto
+# The atto binary is now available at ./atto. You could also install
+# to ~/go/bin/ by executing "go install ./cmd/atto".
 ```
 
 For Arch Linux @kseistrup also made [atto available in the
