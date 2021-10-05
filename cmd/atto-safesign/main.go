@@ -23,15 +23,20 @@ var usage = `Usage:
 If the -v flag is provided, atto-safesign will print its version number.
 
 The receive, representative, send and submit subcommands expect a Nano
-address as the first line of their standard input.
-
-The sign subcommand expects a seed as the first line of standard input.
-It also expects manual confirmation before signing blocks, unless the -y
-flag is given.
+address as the first line of their standard input. This address will be
+the account of the generated and submitted blocks.
 
 The receive, representative and send subcommands will generate blocks
 and append them to FILE. The blocks will still be lacking their
-signature.
+signature. The receive subcommand will create multiple blocks, if there
+are multiple pending sends that can be received. The representative
+subcommand will create a block for changing the representative and the
+send subcommand will create a block for sending funds to an address.
+
+The sign subcommand expects a seed as the first line of standard input.
+It also expects manual confirmation before signing blocks, unless the
+-y flag is given. The seed and ACCOUNT_INDEX must belong to the address
+used when creating blocks with receive, representative or send.
 
 The sign subcommand will add signatures to all blocks in FILE. It is the
 only subcommand that requires no network connection.
