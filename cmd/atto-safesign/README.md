@@ -35,9 +35,15 @@ online$ echo $MY_ADDRESS | atto-safesign test.atto representative nano_3up3y8cd3
 
 offline$ # The sign subcommand can then be used on an offline computer:
 offline$ pass nano | atto-safesign test.atto sign
+Sign block that sets balance to 0.100 NANO and representative to nano_18shbirtzhmkf7166h39nowj9c9zrpufeg75bkbyoobqwf1iu3srfm9eo3pz? [y/N]: y
+Sign block that sets balance to 0.232 NANO and representative to nano_18shbirtzhmkf7166h39nowj9c9zrpufeg75bkbyoobqwf1iu3srfm9eo3pz? [y/N]: y
+Sign block that sets balance to 0.232 NANO and representative to nano_3up3y8cd3hhs7zdpmkpssgb1iyjpke3xwmgqy8rg58z1hwryqpjqnkuqayps? [y/N]: y
 
 online$ # Back at the online computer, the now signed blocks can be submitted:
 online$ echo $MY_ADDRESS | atto-safesign test.atto submit
+Submitting block... done
+Submitting block... done
+Submitting block... done
 ```
 
 This is `atto-safesign`'s help text:
