@@ -130,8 +130,11 @@ func printBalance() error {
 	if err != nil {
 		return err
 	}
+	firstReceive := false // Is this the very first block of the account?
 	info, err := account.FetchAccountInfo(node)
-	if err != nil {
+	if err == atto.ErrAccountNotFound {
+		firstReceive = true
+	} else if err != nil {
 		return err
 	}
 	pendings, err := account.FetchPending(node)
@@ -145,7 +148,14 @@ func printBalance() error {
 			return fmt.Errorf("cannot parse '%s' as an integer", pending.Amount)
 		}
 		fmt.Fprintf(os.Stderr, txt, rawToNanoString(amount), pending.Source)
-		block, err := info.Receive(pending)
+		var block atto.Block
+		if firstReceive {
+			fmt.Fprintf(os.Stderr, "opening account... ")
+			info, block, err = account.FirstReceive(pending, defaultRepresentative)
+			firstReceive = false
+		} else {
+			block, err = info.Receive(pending)
+		}
 		if err != nil {
 			return err
 		}
