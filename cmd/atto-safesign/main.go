@@ -111,8 +111,11 @@ func receive() error {
 	if err != nil {
 		return err
 	}
+	firstReceive := false // Is this the very first block of the account?
 	info, err := getLatestAccountInfo(account)
-	if err != nil {
+	if err == atto.ErrAccountNotFound {
+		firstReceive = true
+	} else if err != nil {
 		return err
 	}
 	pendings, err := account.FetchPending(node)
@@ -120,7 +123,13 @@ func receive() error {
 		return err
 	}
 	for _, pending := range pendings {
-		block, err := info.Receive(pending)
+		var block atto.Block
+		if firstReceive {
+			info, block, err = account.FirstReceive(pending, defaultRepresentative)
+			firstReceive = false
+		} else {
+			block, err = info.Receive(pending)
+		}
 		if err != nil {
 			return err
 		}
@@ -256,19 +265,25 @@ func submit() error {
 	if err != nil {
 		return err
 	}
+
+	var oldBalance *big.Int
 	info, err := account.FetchAccountInfo(node)
-	if err != nil {
+	if err == atto.ErrAccountNotFound {
+		oldBalance = big.NewInt(0)
+	} else if err != nil {
 		return err
+	} else {
+		var ok bool
+		oldBalance, ok = big.NewInt(0).SetString(info.Balance, 10)
+		if !ok {
+			return fmt.Errorf("cannot parse '%s' as an integer", info.Balance)
+		}
 	}
 
-	oldBalance, ok := big.NewInt(0).SetString(info.Balance, 10)
-	if !ok {
-		fmt.Errorf("cannot parse '%s' as an integer", info.Balance)
-	}
 	for _, block := range blocks {
 		newBalance, ok := big.NewInt(0).SetString(block.Balance, 10)
 		if !ok {
-			fmt.Errorf("cannot parse '%s' as an integer", block.Balance)
+			return fmt.Errorf("cannot parse '%s' as an integer", block.Balance)
 		}
 		switch oldBalance.Cmp(newBalance) {
 		case -1:
