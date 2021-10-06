@@ -7,8 +7,7 @@ import (
 	"strings"
 )
 
-// AccountInfo holds the relevant data returned by an account_info RPC
-// and the public key and address of the account.
+// AccountInfo holds the basic data needed for Block creation.
 type AccountInfo struct {
 	// Ignore this field. It only exists because of
 	// https://github.com/nanocurrency/nano-node/issues/1782.
