@@ -21,7 +21,7 @@ type AccountInfo struct {
 	Address   string   `json:"-"`
 }
 
-// Send creates a send block, which is hashed but missing the signature
+// Send creates a send block, which will still be missing its signature
 // and work. The Frontier and Balance of the AccountInfo will be
 // updated. The amount is interpreted as Nano, not raw!
 func (i *AccountInfo) Send(amount, toAddr string) (Block, error) {
@@ -87,7 +87,7 @@ func nanoStringToRaw(amountString string) (*big.Int, error) {
 	return amount, nil
 }
 
-// Change creates a change block, which is hashed but missing the
+// Change creates a change block, which will still be missing its
 // signature and work. The Frontier and Representative of the
 // AccountInfo will be updated.
 func (i *AccountInfo) Change(representative string) (Block, error) {
@@ -108,7 +108,7 @@ func (i *AccountInfo) Change(representative string) (Block, error) {
 	return block, err
 }
 
-// Receive creates a receive block, which is hashed but missing the
+// Receive creates a receive block, which will still be missing its
 // signature and work. The Frontier and Balance of the AccountInfo will
 // be updated.
 func (i *AccountInfo) Receive(pending Pending) (Block, error) {
