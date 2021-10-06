@@ -15,7 +15,7 @@ import (
 func GenerateSeed() (string, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
-	return fmt.Sprintf("%X\n", b), err
+	return fmt.Sprintf("%X", b), err
 }
 
 // NewPrivateKey creates a private key from the given seed and index.
