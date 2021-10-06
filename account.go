@@ -78,6 +78,10 @@ func getAddress(publicKey *big.Int) (string, error) {
 // doing a block_info RPC for the frontier, verifying the signature
 // and ensuring that no fields have been changed in the account_info
 // response.
+//
+// If ErrAccountNotFound is returned, FirstReceive can be used to
+// create a first Block and AccountInfo and create the account by then
+// submitting this Block.
 func (a Account) FetchAccountInfo(node string) (i AccountInfo, err error) {
 	requestBody := fmt.Sprintf(`{`+
 		`"action": "account_info",`+
@@ -157,4 +161,31 @@ func (a Account) FetchPending(node string) ([]Pending, error) {
 		err = fmt.Errorf("could not fetch unreceived sends: %s", pending.Error)
 	}
 	return internalPendingToPending(pending), err
+}
+
+// FirstReceive creates the first receive block of an account. The block
+// will still be missing its signature and work. FirstReceive will also
+// return AccountInfo, which can be used to create further blocks.
+func (a Account) FirstReceive(pending Pending, representative string) (AccountInfo, Block, error) {
+	block := Block{
+		Type:           "state",
+		SubType:        SubTypeReceive,
+		Account:        a.Address,
+		Previous:       "0000000000000000000000000000000000000000000000000000000000000000",
+		Representative: representative,
+		Balance:        pending.Amount,
+		Link:           pending.Hash,
+	}
+	hash, err := block.Hash()
+	if err != nil {
+		return AccountInfo{}, Block{}, err
+	}
+	info := AccountInfo{
+		Frontier:       hash,
+		Representative: block.Representative,
+		Balance:        block.Balance,
+		PublicKey:      a.PublicKey,
+		Address:        a.Address,
+	}
+	return info, block, err
 }
