@@ -133,6 +133,9 @@ func printBalance() error {
 	firstReceive := false // Is this the very first block of the account?
 	info, err := account.FetchAccountInfo(node)
 	if err == atto.ErrAccountNotFound {
+		// Needed for printing balance, even if nothing is pending:
+		info.Balance = "0"
+
 		firstReceive = true
 	} else if err != nil {
 		return err
