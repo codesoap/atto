@@ -79,6 +79,8 @@ func getAddress(publicKey *big.Int) (string, error) {
 // and ensuring that no fields have been changed in the account_info
 // response.
 //
+// May return ErrAccountNotFound or ErrAccountManipulated.
+//
 // If ErrAccountNotFound is returned, FirstReceive can be used to
 // create a first Block and AccountInfo and create the account by then
 // submitting this Block.

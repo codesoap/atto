@@ -179,6 +179,8 @@ func (b Block) hashBytes() ([]byte, error) {
 
 // Submit submits the Block to the given node. Work and Signature of b
 // must be populated beforehand.
+//
+// May return ErrWorkMissing or ErrSignatureMissing.
 func (b Block) Submit(node string) error {
 	if b.Work == "" {
 		return ErrWorkMissing
