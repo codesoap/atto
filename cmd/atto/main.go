@@ -51,7 +51,7 @@ func init() {
 	flag.BoolVar(&vFlag, "v", false, "")
 	flag.Parse()
 	if vFlag {
-		fmt.Println("1.2.1")
+		fmt.Println("1.3.0")
 		os.Exit(0)
 	}
 	if flag.NArg() < 1 {
