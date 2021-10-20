@@ -20,13 +20,18 @@ func getSeed() (string, error) {
 }
 
 func rawToNanoString(raw *big.Int) string {
-	rawPerKnano, _ := big.NewInt(0).SetString("1000000000000000000000000000", 10)
-	balance := big.NewInt(0).Div(raw, rawPerKnano).Int64()
-	if balance < 0 {
-		balance = -balance
-		return fmt.Sprintf("-%d.%03d NANO", balance/1000, balance%1000)
+	rawPerNano, _ := big.NewInt(0).SetString("1000000000000000000000000000000", 10)
+	absRaw := big.NewInt(0).Abs(raw)
+	integerDigits, fractionalDigits := big.NewInt(0).QuoRem(absRaw, rawPerNano, big.NewInt(0))
+	res := integerDigits.String()
+	if fractionalDigits.Sign() != 0 {
+		fractionalDigitsString := fmt.Sprintf("%030s", fractionalDigits.String())
+		res += "." + strings.TrimRight(fractionalDigitsString, "0")
 	}
-	return fmt.Sprintf("%d.%03d NANO", balance/1000, balance%1000)
+	if raw.Sign() < 0 {
+		return "-" + res + " NANO"
+	}
+	return res + " NANO"
 }
 
 func letUserVerifySend(amount, recipient string) (err error) {

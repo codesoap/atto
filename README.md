@@ -45,7 +45,7 @@ nano_1o3igdpf8c4msdgwcop71x4o16zzkhe4kyku4axdi8iwh8wh13e4fwgherik
 $ # The balance command will receive pending funds automatically.
 $ pass nano | atto balance
 Creating receive block for 1.025 from nano_34ymtnmhwseiex4eqf7nnf5wcyg44kknuuen5wwurm18ma91msf6e1pqo8hx... done
-Creating receive block for 0.100 from nano_39nd8eksw1ia6aokn96z4uthocke47hfsx9gr31othm1nrfwnzmmaeehiccq... done
+Creating receive block for 0.1 from nano_39nd8eksw1ia6aokn96z4uthocke47hfsx9gr31othm1nrfwnzmmaeehiccq... done
 1.337 NANO
 
 $ # Choosing a representative is important for keeping the network
