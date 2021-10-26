@@ -3,7 +3,6 @@ package atto
 import (
 	"fmt"
 	"math/big"
-	"regexp"
 	"strings"
 )
 
@@ -58,31 +57,24 @@ func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
 		err := fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
 		return nil, err
 	}
-	amountRaw, err := nanoStringToRaw(amount)
+	amountRaw, err := nanoToRaw(amount)
 	if err != nil {
 		return nil, err
 	}
 	return balance.Sub(balance, amountRaw), nil
 }
 
-func nanoStringToRaw(amountString string) (*big.Int, error) {
-	pattern := `^([0-9]+|[0-9]*\.[0-9]{1,30})$`
-	amountOk, err := regexp.MatchString(pattern, amountString)
-	if !amountOk {
-		return nil, fmt.Errorf("'%s' is no legal amountString", amountString)
-	} else if err != nil {
-		return nil, err
-	}
+func nanoToRaw(amountString string) (*big.Int, error) {
+	i := strings.Index(amountString, ".")
 	missingZerosUntilRaw := 30
-	if i := strings.Index(amountString, "."); i > -1 {
-		missingZerosUntilRaw -= len(amountString) - i - 1
-		amountString = strings.Replace(amountString, ".", "", 1)
+	if i > -1 {
+		missingZerosUntilRaw = 31 + i - len(amountString)
+		amountString = amountString[:i] + amountString[i+1:] // Remove "."
 	}
 	amountString += strings.Repeat("0", missingZerosUntilRaw)
 	amount, ok := big.NewInt(0).SetString(amountString, 10)
 	if !ok {
-		err := fmt.Errorf("cannot parse '%s' as an interger", amountString)
-		return nil, err
+		return nil, fmt.Errorf("cannot parse '%s' as an interger", amountString)
 	}
 	return amount, nil
 }
