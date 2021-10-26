@@ -19,24 +19,24 @@ func getSeed() (string, error) {
 	return strings.TrimSpace(firstLine), nil
 }
 
-func rawToNanoString(raw *big.Int) string {
-	rawPerNano, _ := big.NewInt(0).SetString("1000000000000000000000000000000", 10)
+func rawToXNO(raw *big.Int) string {
+	rawPerXNO, _ := big.NewInt(0).SetString("1000000000000000000000000000000", 10)
 	absRaw := big.NewInt(0).Abs(raw)
-	integerDigits, fractionalDigits := big.NewInt(0).QuoRem(absRaw, rawPerNano, big.NewInt(0))
+	integerDigits, fractionalDigits := big.NewInt(0).QuoRem(absRaw, rawPerXNO, big.NewInt(0))
 	res := integerDigits.String()
 	if fractionalDigits.Sign() != 0 {
 		fractionalDigitsString := fmt.Sprintf("%030s", fractionalDigits.String())
 		res += "." + strings.TrimRight(fractionalDigitsString, "0")
 	}
 	if raw.Sign() < 0 {
-		return "-" + res + " NANO"
+		return "-" + res + " XNO"
 	}
-	return res + " NANO"
+	return res + " XNO"
 }
 
 func letUserVerifySend(amount, recipient string) (err error) {
 	if !yFlag {
-		fmt.Printf("Send %s NANO to %s? [y/N]: ", amount, recipient)
+		fmt.Printf("Send %s XNO to %s? [y/N]: ", amount, recipient)
 
 		// Explicitly openning /dev/tty or CONIN$ ensures function, even if
 		// the standard input is not a terminal.

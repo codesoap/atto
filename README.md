@@ -46,7 +46,7 @@ $ # The balance command will receive pending funds automatically.
 $ pass nano | atto balance
 Creating receive block for 1.025 from nano_34ymtnmhwseiex4eqf7nnf5wcyg44kknuuen5wwurm18ma91msf6e1pqo8hx... done
 Creating receive block for 0.1 from nano_39nd8eksw1ia6aokn96z4uthocke47hfsx9gr31othm1nrfwnzmmaeehiccq... done
-1.337 NANO
+1.337 XNO
 
 $ # Choosing a representative is important for keeping the network
 $ # decentralized.
@@ -56,7 +56,7 @@ Creating change block... done
 $ # To avoid accidental loss of funds, the send command requires
 $ # confirmation, unless the -y flag is given:
 $ pass nano | atto send 0.1 nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5
-Send 0.1 NANO to nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5? [y/N]: y
+Send 0.1 XNO to nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5? [y/N]: y
 Creating send block... done
 
 $ atto -h

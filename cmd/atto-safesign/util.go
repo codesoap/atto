@@ -88,19 +88,19 @@ func appendLineToFile(in []byte) error {
 	return err
 }
 
-func rawToNanoString(raw *big.Int) string {
-	rawPerNano, _ := big.NewInt(0).SetString("1000000000000000000000000000000", 10)
+func rawToXNO(raw *big.Int) string {
+	rawPerXNO, _ := big.NewInt(0).SetString("1000000000000000000000000000000", 10)
 	absRaw := big.NewInt(0).Abs(raw)
-	integerDigits, fractionalDigits := big.NewInt(0).QuoRem(absRaw, rawPerNano, big.NewInt(0))
+	integerDigits, fractionalDigits := big.NewInt(0).QuoRem(absRaw, rawPerXNO, big.NewInt(0))
 	res := integerDigits.String()
 	if fractionalDigits.Sign() != 0 {
 		fractionalDigitsString := fmt.Sprintf("%030s", fractionalDigits.String())
 		res += "." + strings.TrimRight(fractionalDigitsString, "0")
 	}
 	if raw.Sign() < 0 {
-		return "-" + res + " NANO"
+		return "-" + res + " XNO"
 	}
-	return res + " NANO"
+	return res + " XNO"
 }
 
 func letUserVerifyBlock(block atto.Block) (err error) {
@@ -109,9 +109,9 @@ func letUserVerifyBlock(block atto.Block) (err error) {
 		if !ok {
 			return fmt.Errorf("cannot parse '%s' as an integer", block.Balance)
 		}
-		balanceNano := rawToNanoString(balanceInt)
+		balanceXNO := rawToXNO(balanceInt)
 		txt := "Sign block that sets balance to %s and representative to %s? [y/N]: "
-		fmt.Fprintf(os.Stderr, txt, balanceNano, block.Representative)
+		fmt.Fprintf(os.Stderr, txt, balanceXNO, block.Representative)
 
 		// Explicitly openning /dev/tty or CONIN$ ensures function, even if
 		// the standard input is not a terminal.

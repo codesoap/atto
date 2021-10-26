@@ -22,7 +22,7 @@ type AccountInfo struct {
 
 // Send creates a send block, which will still be missing its signature
 // and work. The Frontier and Balance of the AccountInfo will be
-// updated. The amount is interpreted as Nano, not raw!
+// updated. The amount is interpreted as XNO, not raw!
 func (i *AccountInfo) Send(amount, toAddr string) (Block, error) {
 	balance, err := getBalanceAfterSend(i.Balance, amount)
 	if err != nil {
@@ -57,14 +57,14 @@ func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
 		err := fmt.Errorf("cannot parse '%s' as an integer", oldBalance)
 		return nil, err
 	}
-	amountRaw, err := nanoToRaw(amount)
+	amountRaw, err := xnoToRaw(amount)
 	if err != nil {
 		return nil, err
 	}
 	return balance.Sub(balance, amountRaw), nil
 }
 
-func nanoToRaw(amountString string) (*big.Int, error) {
+func xnoToRaw(amountString string) (*big.Int, error) {
 	i := strings.Index(amountString, ".")
 	missingZerosUntilRaw := 30
 	if i > -1 {

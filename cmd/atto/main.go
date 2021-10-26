@@ -150,7 +150,7 @@ func printBalance() error {
 		if !ok {
 			return fmt.Errorf("cannot parse '%s' as an integer", pending.Amount)
 		}
-		fmt.Fprintf(os.Stderr, txt, rawToNanoString(amount), pending.Source)
+		fmt.Fprintf(os.Stderr, txt, rawToXNO(amount), pending.Source)
 		var block atto.Block
 		if firstReceive {
 			fmt.Fprintf(os.Stderr, "opening account... ")
@@ -177,7 +177,7 @@ func printBalance() error {
 	if !ok {
 		return fmt.Errorf("cannot parse '%s' as an integer", info.Balance)
 	}
-	fmt.Println(rawToNanoString(newBalance))
+	fmt.Println(rawToXNO(newBalance))
 	return nil
 }
 
