@@ -60,7 +60,7 @@ func init() {
 	flag.BoolVar(&vFlag, "v", false, "")
 	flag.Parse()
 	if vFlag {
-		fmt.Println("1.1.0")
+		fmt.Println("1.2.0")
 		os.Exit(0)
 	}
 	if flag.NArg() < 2 {
