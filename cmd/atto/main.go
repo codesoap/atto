@@ -54,7 +54,7 @@ func init() {
 		fmt.Println("1.4.0")
 		os.Exit(0)
 	}
-	if flag.NArg() < 1 {
+	if accountIndexFlag >= 1<<32 || flag.NArg() < 1 {
 		flag.Usage()
 		os.Exit(1)
 	}
