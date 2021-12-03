@@ -9,5 +9,8 @@ var (
 	// - https://rainstorm.city/api
 	node = "https://proxy.powernode.cc/proxy"
 
-	defaultRepresentative = "nano_18shbirtzhmkf7166h39nowj9c9zrpufeg75bkbyoobqwf1iu3srfm9eo3pz"
+	// defaultRepresentative will be set as the representative when
+	// opening an accout, but can be changed afterwards. See e.g.
+	// https://mynano.ninja/principals to find representatives.
+	defaultRepresentative = "nano_3hjo1cehsxrssawmpew98u4ug8bxy4ppht5ch647zpuscdgedfy1xh4yga7z"
 )
