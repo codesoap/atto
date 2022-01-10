@@ -112,6 +112,9 @@ https://nanocrawler.cc/ to investigate transaction history.
 # Offline signing
 See [atto-safesign](cmd/atto-safesign/).
 
+# PHP integration, attoPHP (3rd party)
+See [https://github.com/Gigaion/attoPHP](https://github.com/Gigaion/attoPHP).
+
 # Donations
 If you want to show your appreciation for atto, you can donate to me at
 `nano_1i7wsbehgwhxct91wpojr1j588ydikd64uc7p3kj54nofqioc6ydjopezf13`.
