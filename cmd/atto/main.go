@@ -165,7 +165,7 @@ func printBalance() error {
 		if err = block.Sign(privateKey); err != nil {
 			return err
 		}
-		if err = block.FetchWork(node); err != nil {
+		if err = block.FetchWork(nodeWork); err != nil {
 			return err
 		}
 		if err = block.Submit(node); err != nil {
@@ -208,7 +208,7 @@ func changeRepresentative() error {
 	if err = block.Sign(privateKey); err != nil {
 		return err
 	}
-	if err = block.FetchWork(node); err != nil {
+	if err = block.FetchWork(nodeWork); err != nil {
 		return err
 	}
 	if err = block.Submit(node); err != nil {
@@ -249,7 +249,7 @@ func sendFunds() error {
 	if err = block.Sign(privateKey); err != nil {
 		return err
 	}
-	if err = block.FetchWork(node); err != nil {
+	if err = block.FetchWork(nodeWork); err != nil {
 		return err
 	}
 	if err = block.Submit(node); err != nil {
