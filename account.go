@@ -46,7 +46,10 @@ func NewAccountFromAddress(address string) (a Account, err error) {
 
 func derivePublicKey(privateKey *big.Int) *big.Int {
 	hashBytes := blake2b.Sum512(bigIntToBytes(privateKey, 32))
-	scalar := edwards25519.NewScalar().SetBytesWithClamping(hashBytes[:32])
+	scalar, err := edwards25519.NewScalar().SetBytesWithClamping(hashBytes[:32])
+	if err != nil {
+		panic(err)
+	}
 	publicKeyBytes := edwards25519.NewIdentityPoint().ScalarBaseMult(scalar).Bytes()
 	return big.NewInt(0).SetBytes(publicKeyBytes)
 }

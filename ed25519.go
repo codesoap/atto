@@ -21,14 +21,20 @@ func sign(publicKey, privateKey *big.Int, msg []byte) ([]byte, error) {
 	var digest1, messageDigest, hramDigest [64]byte
 	h.Sum(digest1[:0])
 
-	s := new(edwards25519.Scalar).SetBytesWithClamping(digest1[:32])
+	s, err := new(edwards25519.Scalar).SetBytesWithClamping(digest1[:32])
+	if err != nil {
+		return signature, err
+	}
 
 	h.Reset()
 	h.Write(digest1[32:])
 	h.Write(msg)
 	h.Sum(messageDigest[:0])
 
-	rReduced := new(edwards25519.Scalar).SetUniformBytes(messageDigest[:])
+	rReduced, err := new(edwards25519.Scalar).SetUniformBytes(messageDigest[:])
+	if err != nil {
+		return signature, err
+	}
 	R := new(edwards25519.Point).ScalarBaseMult(rReduced)
 
 	encodedR := R.Bytes()
@@ -39,7 +45,10 @@ func sign(publicKey, privateKey *big.Int, msg []byte) ([]byte, error) {
 	h.Write(msg)
 	h.Sum(hramDigest[:0])
 
-	kReduced := new(edwards25519.Scalar).SetUniformBytes(hramDigest[:])
+	kReduced, err := new(edwards25519.Scalar).SetUniformBytes(hramDigest[:])
+	if err != nil {
+		return signature, err
+	}
 	S := new(edwards25519.Scalar).MultiplyAdd(kReduced, s, rReduced)
 
 	copy(signature[:], encodedR[:])
@@ -69,7 +78,10 @@ func isValidSignature(publicKey *big.Int, msg, sig []byte) bool {
 	h.Write(msg)
 	var digest [64]byte
 	h.Sum(digest[:0])
-	hReduced := new(edwards25519.Scalar).SetUniformBytes(digest[:])
+	hReduced, err := new(edwards25519.Scalar).SetUniformBytes(digest[:])
+	if err != nil {
+		return false
+	}
 
 	// ZIP215: this works because SetBytes does not check that encodings are canonical
 	checkR, err := new(edwards25519.Point).SetBytes(sig[:32])
