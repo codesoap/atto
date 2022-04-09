@@ -5,7 +5,9 @@ simplicity. Included is a rudimentary Go library to interact with Nano
 nodes.
 
 Disclaimer: I am no cryptographer and atto has not been audited. I
-cannot guarantee that atto is free of security compromising bugs.
+cannot guarantee that atto is free of security compromising bugs. If
+you want to be extra cautious, I recommend offline signing, which is
+possible with the included [atto-safesign](cmd/atto-safesign/).
 
 # Installation
 You can download precompiled binaries from the [releases
@@ -108,9 +110,6 @@ atto does not have any persistance and writes nothing to your
 file system. This makes atto very portable, but also means, that
 no history is stored locally. I recommend using a service like
 https://nanocrawler.cc/ to investigate transaction history.
-
-# Offline signing
-See [atto-safesign](cmd/atto-safesign/).
 
 # Donations
 If you want to show your appreciation for atto, you can donate to me at
