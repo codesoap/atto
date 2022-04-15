@@ -66,9 +66,9 @@ func getBalanceAfterSend(oldBalance string, amount string) (*big.Int, error) {
 
 func nanoToRaw(amountString string) (*big.Int, error) {
 	i := strings.Index(amountString, ".")
-	missingZerosUntilRaw := 30
+	missingZerosUntilRaw := 29
 	if i > -1 {
-		missingZerosUntilRaw = 31 + i - len(amountString)
+		missingZerosUntilRaw = 30 + i - len(amountString)
 		amountString = amountString[:i] + amountString[i+1:] // Remove "."
 	}
 	amountString += strings.Repeat("0", missingZerosUntilRaw)

@@ -20,12 +20,12 @@ func getSeed() (string, error) {
 }
 
 func rawToNanoString(raw *big.Int) string {
-	rawPerNano, _ := big.NewInt(0).SetString("1000000000000000000000000000000", 10)
+	rawPerNano, _ := big.NewInt(0).SetString("100000000000000000000000000000", 10)
 	absRaw := big.NewInt(0).Abs(raw)
 	integerDigits, fractionalDigits := big.NewInt(0).QuoRem(absRaw, rawPerNano, big.NewInt(0))
 	res := integerDigits.String()
 	if fractionalDigits.Sign() != 0 {
-		fractionalDigitsString := fmt.Sprintf("%030s", fractionalDigits.String())
+		fractionalDigitsString := fmt.Sprintf("%029s", fractionalDigits.String())
 		res += "." + strings.TrimRight(fractionalDigitsString, "0")
 	}
 	if raw.Sign() < 0 {
