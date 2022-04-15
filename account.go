@@ -68,7 +68,7 @@ func getAddress(publicKey *big.Int) (string, error) {
 	hashBytes := hasher.Sum(nil)
 	base32Hash := base32Encode(big.NewInt(0).SetBytes(revertBytes(hashBytes)))
 
-	address := "nano_" +
+	address := "ban_" +
 		strings.Repeat("1", 52-len(base32PublicKey)) + base32PublicKey +
 		strings.Repeat("1", 8-len(base32Hash)) + base32Hash
 	return address, nil

@@ -29,15 +29,15 @@ representative changed:
 
 ```
 online$ # These steps take place on an online computer:
-online$ MY_ADDRESS=nano_1yqtxctufmrgfa5aq8gqa3eyr45hsghqau8ihe7hzaq1tdggjxsqbbkqofi7
+online$ MY_ADDRESS=ban_1yqtxctufmrgfa5aq8gqa3eyr45hsghqau8ihe7hzaq1tdggjxsqbbkqofi7
 online$ echo $MY_ADDRESS | atto-safesign test.atto receive
-online$ echo $MY_ADDRESS | atto-safesign test.atto representative nano_3up3y8cd3hhs7zdpmkpssgb1iyjpke3xwmgqy8rg58z1hwryqpjqnkuqayps
+online$ echo $MY_ADDRESS | atto-safesign test.atto representative ban_3up3y8cd3hhs7zdpmkpssgb1iyjpke3xwmgqy8rg58z1hwryqpjqnkuqayps
 
 offline$ # The sign subcommand can then be used on an offline computer:
 offline$ pass nano | atto-safesign test.atto sign
-Sign block that sets balance to 0.1 NANO and representative to nano_18shbirtzhmkf7166h39nowj9c9zrpufeg75bkbyoobqwf1iu3srfm9eo3pz? [y/N]: y
-Sign block that sets balance to 0.232 NANO and representative to nano_18shbirtzhmkf7166h39nowj9c9zrpufeg75bkbyoobqwf1iu3srfm9eo3pz? [y/N]: y
-Sign block that sets balance to 0.232 NANO and representative to nano_3up3y8cd3hhs7zdpmkpssgb1iyjpke3xwmgqy8rg58z1hwryqpjqnkuqayps? [y/N]: y
+Sign block that sets balance to 0.1 NANO and representative to ban_18shbirtzhmkf7166h39nowj9c9zrpufeg75bkbyoobqwf1iu3srfm9eo3pz? [y/N]: y
+Sign block that sets balance to 0.232 NANO and representative to ban_18shbirtzhmkf7166h39nowj9c9zrpufeg75bkbyoobqwf1iu3srfm9eo3pz? [y/N]: y
+Sign block that sets balance to 0.232 NANO and representative to ban_3up3y8cd3hhs7zdpmkpssgb1iyjpke3xwmgqy8rg58z1hwryqpjqnkuqayps? [y/N]: y
 
 online$ # Back at the online computer, the now signed blocks can be submitted:
 online$ echo $MY_ADDRESS | atto-safesign test.atto submit

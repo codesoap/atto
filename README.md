@@ -37,28 +37,28 @@ Retype password for nano: D420296F5FEF486175FAA8F649DED00A5B0A096DB8D03972937542
 
 $ # The address command shows the address for an account.
 $ pass nano | atto address
-nano_3cyb3rwp5ba47t5jdzm5o7apeduppsgzw8ockn1dqt4xcqgapta6gh5htnnh
+ban_3cyb3rwp5ba47t5jdzm5o7apeduppsgzw8ockn1dqt4xcqgapta6gh5htnnh
 
 $ # With address and all following commands you can also provide an
 $ # alternative account index (default is 0):
 $ pass nano | atto -a 1 address
-nano_1o3igdpf8c4msdgwcop71x4o16zzkhe4kyku4axdi8iwh8wh13e4fwgherik
+ban_1o3igdpf8c4msdgwcop71x4o16zzkhe4kyku4axdi8iwh8wh13e4fwgherik
 
 $ # The balance command will receive pending funds automatically.
 $ pass nano | atto balance
-Creating receive block for 1.025 from nano_34ymtnmhwseiex4eqf7nnf5wcyg44kknuuen5wwurm18ma91msf6e1pqo8hx... done
-Creating receive block for 0.1 from nano_39nd8eksw1ia6aokn96z4uthocke47hfsx9gr31othm1nrfwnzmmaeehiccq... done
+Creating receive block for 1.025 from ban_34ymtnmhwseiex4eqf7nnf5wcyg44kknuuen5wwurm18ma91msf6e1pqo8hx... done
+Creating receive block for 0.1 from ban_39nd8eksw1ia6aokn96z4uthocke47hfsx9gr31othm1nrfwnzmmaeehiccq... done
 1.337 NANO
 
 $ # Choosing a representative is important for keeping the network
 $ # decentralized.
-$ pass nano | atto representative nano_1jr699mk1fi6mxy1y76fmuyf3dgms8s5pzcsge5cyt1az93x4n18uxjenx93
+$ pass nano | atto representative ban_1jr699mk1fi6mxy1y76fmuyf3dgms8s5pzcsge5cyt1az93x4n18uxjenx93
 Creating change block... done
 
 $ # To avoid accidental loss of funds, the send command requires
 $ # confirmation, unless the -y flag is given:
-$ pass nano | atto send 0.1 nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5
-Send 0.1 NANO to nano_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5? [y/N]: y
+$ pass nano | atto send 0.1 ban_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5
+Send 0.1 NANO to ban_11zdqnjpisos53uighoaw95satm4ptdruck7xujbjcs44pbkkbw1h3zomns5? [y/N]: y
 Creating send block... done
 
 $ atto -h
@@ -113,4 +113,4 @@ https://nanocrawler.cc/ to investigate transaction history.
 
 # Donations
 If you want to show your appreciation for atto, you can donate to me at
-`nano_1i7wsbehgwhxct91wpojr1j588ydikd64uc7p3kj54nofqioc6ydjopezf13`.
+`ban_1i7wsbehgwhxct91wpojr1j588ydikd64uc7p3kj54nofqioc6ydjopezf13`.
