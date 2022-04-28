@@ -107,7 +107,15 @@ func revertBytes(in []byte) []byte {
 }
 
 func doRPC(requestBody, node string) (responseBytes []byte, err error) {
-	resp, err := http.Post(node, "application/json", strings.NewReader(requestBody))
+	req, err := http.NewRequest("POST", node, strings.NewReader(requestBody))
+	if err != nil {
+		return
+	}
+	req.Header.Add("Content-Type", "application/json")
+	if DefaultNodeAuthenticator != nil {
+		DefaultNodeAuthenticator.Authenticate(req)
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return
 	}
