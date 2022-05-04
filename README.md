@@ -91,6 +91,13 @@ the send subcommand sends funds to an address.
 ACCOUNT_INDEX is an optional parameter, which must be a number between 0
 and 4,294,967,295. It allows you to use multiple accounts derived from
 the same seed. By default the account with index 0 is chosen.
+
+Environment:
+	ATTO_BASIC_AUTH_USERNAME  The username for HTTP Basic Authentication.
+	                          If set, HTTP Basic Authentication will be
+	                          used when making requests to the node.
+	ATTO_BASIC_AUTH_PASSWORD  The password to use for HTTP Basic
+	                          Authentication.
 ```
 
 # Technical details

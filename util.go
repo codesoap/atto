@@ -112,8 +112,11 @@ func doRPC(requestBody, node string) (responseBytes []byte, err error) {
 		return
 	}
 	req.Header.Add("Content-Type", "application/json")
-	if DefaultNodeAuthenticator != nil {
-		DefaultNodeAuthenticator.Authenticate(req)
+	if RequestInterceptor != nil {
+		if err = RequestInterceptor(req); err != nil {
+			err = fmt.Errorf("request interceptor failed: %v", err)
+			return
+		}
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

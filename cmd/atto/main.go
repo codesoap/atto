@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"math/big"
+	"net/http"
 	"os"
 
 	"github.com/codesoap/atto"
@@ -83,9 +84,11 @@ func init() {
 
 func setUpNodeAuthentication() {
 	if os.Getenv("ATTO_BASIC_AUTH_USERNAME") != "" {
-		atto.DefaultNodeAuthenticator = atto.NodeBasicAuth{
-			Username: os.Getenv("ATTO_BASIC_AUTH_USERNAME"),
-			Password: os.Getenv("ATTO_BASIC_AUTH_PASSWORD"),
+		username := os.Getenv("ATTO_BASIC_AUTH_USERNAME")
+		password := os.Getenv("ATTO_BASIC_AUTH_PASSWORD")
+		atto.RequestInterceptor = func(request *http.Request) error {
+			request.SetBasicAuth(username, password)
+			return nil
 		}
 	}
 }

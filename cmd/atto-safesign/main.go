@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"net/http"
 	"os"
 
 	"github.com/codesoap/atto"
@@ -47,6 +48,13 @@ Nano network.
 ACCOUNT_INDEX is an optional parameter, which allows you to use
 different accounts derived from the given seed. By default the account
 with index 0 is chosen.
+
+Environment:
+	ATTO_BASIC_AUTH_USERNAME  The username for HTTP Basic Authentication.
+	                          If set, HTTP Basic Authentication will be
+	                          used when making requests to the node.
+	ATTO_BASIC_AUTH_PASSWORD  The password to use for HTTP Basic
+	                          Authentication.
 `
 
 var accountIndexFlag uint
@@ -79,6 +87,18 @@ func init() {
 	if !ok {
 		flag.Usage()
 		os.Exit(1)
+	}
+	setUpNodeAuthentication()
+}
+
+func setUpNodeAuthentication() {
+	if os.Getenv("ATTO_BASIC_AUTH_USERNAME") != "" {
+		username := os.Getenv("ATTO_BASIC_AUTH_USERNAME")
+		password := os.Getenv("ATTO_BASIC_AUTH_PASSWORD")
+		atto.RequestInterceptor = func(request *http.Request) error {
+			request.SetBasicAuth(username, password)
+			return nil
+		}
 	}
 }
 
