@@ -9,5 +9,5 @@ var (
 	// defaultRepresentative will be set as the representative when
 	// opening an accout, but can be changed afterwards. See e.g.
 	// https://mynano.ninja/principals to find representatives.
-	defaultRepresentative = "nano_3hjo1cehsxrssawmpew98u4ug8bxy4ppht5ch647zpuscdgedfy1xh4yga7z"
+	defaultRepresentative = "nano_1jtx5p8141zjtukz4msp1x93st7nh475f74odj8673qqm96xczmtcnanos1o"
 )
