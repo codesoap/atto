@@ -23,7 +23,7 @@ type pendingBlocks map[string]pendingBlock
 // necessary due to a bug in the Nano node implementation. See
 // https://github.com/nanocurrency/nano-node/issues/3161.
 func (b *pendingBlocks) UnmarshalJSON(in []byte) error {
-	if string(in) == `""` {
+	if string(in) == `""` || string(in) == `[]` {
 		return nil
 	}
 	var raw map[string]pendingBlock
