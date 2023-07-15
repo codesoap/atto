@@ -103,19 +103,19 @@ func (i *AccountInfo) Change(representative string) (Block, error) {
 // Receive creates a receive block, which will still be missing its
 // signature and work. The Frontier and Balance of the AccountInfo will
 // be updated.
-func (i *AccountInfo) Receive(pending Pending) (Block, error) {
+func (i *AccountInfo) Receive(receivable Receivable) (Block, error) {
 	updatedBalance, ok := big.NewInt(0).SetString(i.Balance, 10)
 	if !ok {
 		err := fmt.Errorf("cannot parse '%s' as an integer", i.Balance)
 		return Block{}, err
 	}
-	amount, ok := big.NewInt(0).SetString(pending.Amount, 10)
+	amount, ok := big.NewInt(0).SetString(receivable.Amount, 10)
 	if !ok {
-		err := fmt.Errorf("cannot parse '%s' as an integer", pending.Amount)
+		err := fmt.Errorf("cannot parse '%s' as an integer", receivable.Amount)
 		return Block{}, err
 	}
 	if amount.Sign() < 1 {
-		err := fmt.Errorf("amount '%s' is not positive", pending.Amount)
+		err := fmt.Errorf("amount '%s' is not positive", receivable.Amount)
 		return Block{}, err
 	}
 	updatedBalance.Add(updatedBalance, amount)
@@ -126,7 +126,7 @@ func (i *AccountInfo) Receive(pending Pending) (Block, error) {
 		Previous:       i.Frontier,
 		Representative: i.Representative,
 		Balance:        updatedBalance.String(),
-		Link:           pending.Hash,
+		Link:           receivable.Hash,
 	}
 	hash, err := block.Hash()
 	if err != nil {

@@ -30,9 +30,9 @@ the account of the generated and submitted blocks.
 The receive, representative and send subcommands will generate blocks
 and append them to FILE. The blocks will still be lacking their
 signature. The receive subcommand will create multiple blocks, if there
-are multiple pending sends that can be received. The representative
-subcommand will create a block for changing the representative and the
-send subcommand will create a block for sending funds to an address.
+are multiple receivable blocks. The representative subcommand will
+create a block for changing the representative and the send subcommand
+will create a block for sending funds to an address.
 
 The sign subcommand expects a seed as the first line of standard input.
 It also expects manual confirmation before signing blocks, unless the
@@ -138,17 +138,17 @@ func receive() error {
 	} else if err != nil {
 		return err
 	}
-	pendings, err := account.FetchPending(node)
+	receivables, err := account.FetchReceivable(node)
 	if err != nil {
 		return err
 	}
-	for _, pending := range pendings {
+	for _, receivable := range receivables {
 		var block atto.Block
 		if firstReceive {
-			info, block, err = account.FirstReceive(pending, defaultRepresentative)
+			info, block, err = account.FirstReceive(receivable, defaultRepresentative)
 			firstReceive = false
 		} else {
-			block, err = info.Receive(pending)
+			block, err = info.Receive(receivable)
 		}
 		if err != nil {
 			return err

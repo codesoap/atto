@@ -24,7 +24,7 @@ go build ./cmd/atto-safesign/
 ```
 
 # Usage
-Here is an example use case where pending sends are received and the
+Here is an example use case where receivable blocks are received and the
 representative changed:
 
 ```
@@ -66,9 +66,9 @@ the account of the generated and submitted blocks.
 The receive, representative and send subcommands will generate blocks
 and append them to FILE. The blocks will still be lacking their
 signature. The receive subcommand will create multiple blocks, if there
-are multiple pending sends that can be received. The representative
-subcommand will create a block for changing the representative and the
-send subcommand will create a block for sending funds to an address.
+are multiple receivable blocks. The representative subcommand will
+create a block for changing the representative and the send subcommand
+will create a block for sending funds to an address.
 
 The sign subcommand expects a seed as the first line of standard input.
 It also expects manual confirmation before signing blocks, unless the

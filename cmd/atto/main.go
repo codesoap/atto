@@ -32,9 +32,9 @@ The send subcommand also expects manual confirmation of the transaction,
 unless the -y flag is given.
 
 The address subcommand displays addresses for a seed, the balance
-subcommand receives pending sends and shows the balance of an account,
-the representative subcommand changes the account's representative and
-the send subcommand sends funds to an address.
+subcommand receives receivable blocks and shows the balance of
+an account, the representative subcommand changes the account's
+representative and the send subcommand sends funds to an address.
 
 ACCOUNT_INDEX is an optional parameter, which must be a number between 0
 and 4,294,967,295. It allows you to use multiple accounts derived from
@@ -153,31 +153,31 @@ func printBalance() error {
 	firstReceive := false // Is this the very first block of the account?
 	info, err := account.FetchAccountInfo(node)
 	if err == atto.ErrAccountNotFound {
-		// Needed for printing balance, even if nothing is pending:
+		// Needed for printing balance, even if there are no receivable blocks:
 		info.Balance = "0"
 
 		firstReceive = true
 	} else if err != nil {
 		return err
 	}
-	pendings, err := account.FetchPending(node)
+	receivables, err := account.FetchReceivable(node)
 	if err != nil {
 		return err
 	}
-	for _, pending := range pendings {
+	for _, receivable := range receivables {
 		txt := "Creating receive block for %s from %s... "
-		amount, ok := big.NewInt(0).SetString(pending.Amount, 10)
+		amount, ok := big.NewInt(0).SetString(receivable.Amount, 10)
 		if !ok {
-			return fmt.Errorf("cannot parse '%s' as an integer", pending.Amount)
+			return fmt.Errorf("cannot parse '%s' as an integer", receivable.Amount)
 		}
-		fmt.Fprintf(os.Stderr, txt, rawToNanoString(amount), pending.Source)
+		fmt.Fprintf(os.Stderr, txt, rawToNanoString(amount), receivable.Source)
 		var block atto.Block
 		if firstReceive {
 			fmt.Fprintf(os.Stderr, "opening account... ")
-			info, block, err = account.FirstReceive(pending, defaultRepresentative)
+			info, block, err = account.FirstReceive(receivable, defaultRepresentative)
 			firstReceive = false
 		} else {
-			block, err = info.Receive(pending)
+			block, err = info.Receive(receivable)
 		}
 		if err != nil {
 			return err

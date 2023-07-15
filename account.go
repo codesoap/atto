@@ -146,10 +146,10 @@ func (a Account) verifyInfo(info AccountInfo, node string) error {
 	return err
 }
 
-// FetchPending fetches all unreceived blocks of Account from node.
-func (a Account) FetchPending(node string) ([]Pending, error) {
+// FetchReceivable fetches all unreceived blocks of Account from node.
+func (a Account) FetchReceivable(node string) ([]Receivable, error) {
 	requestBody := fmt.Sprintf(`{`+
-		`"action": "pending", `+
+		`"action": "receivable", `+
 		`"account": "%s", `+
 		`"include_only_confirmed": "true", `+
 		`"source": "true"`+
@@ -158,28 +158,28 @@ func (a Account) FetchPending(node string) ([]Pending, error) {
 	if err != nil {
 		return nil, err
 	}
-	var pending internalPending
-	err = json.Unmarshal(responseBytes, &pending)
-	// Need to check pending.Error because of
+	var receivable internalReceivable
+	err = json.Unmarshal(responseBytes, &receivable)
+	// Need to check receivable.Error because of
 	// https://github.com/nanocurrency/nano-node/issues/1782.
-	if err == nil && pending.Error != "" {
-		err = fmt.Errorf("could not fetch unreceived sends: %s", pending.Error)
+	if err == nil && receivable.Error != "" {
+		err = fmt.Errorf("could not fetch unreceived sends: %s", receivable.Error)
 	}
-	return internalPendingToPending(pending), err
+	return internalReceivableToReceivable(receivable), err
 }
 
 // FirstReceive creates the first receive block of an account. The block
 // will still be missing its signature and work. FirstReceive will also
 // return AccountInfo, which can be used to create further blocks.
-func (a Account) FirstReceive(pending Pending, representative string) (AccountInfo, Block, error) {
+func (a Account) FirstReceive(receivable Receivable, representative string) (AccountInfo, Block, error) {
 	block := Block{
 		Type:           "state",
 		SubType:        SubTypeReceive,
 		Account:        a.Address,
 		Previous:       "0000000000000000000000000000000000000000000000000000000000000000",
 		Representative: representative,
-		Balance:        pending.Amount,
-		Link:           pending.Hash,
+		Balance:        receivable.Amount,
+		Link:           receivable.Hash,
 	}
 	hash, err := block.Hash()
 	if err != nil {

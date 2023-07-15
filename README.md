@@ -44,7 +44,7 @@ $ # alternative account index (default is 0):
 $ pass nano | atto -a 1 address
 nano_1o3igdpf8c4msdgwcop71x4o16zzkhe4kyku4axdi8iwh8wh13e4fwgherik
 
-$ # The balance command will receive pending funds automatically.
+$ # The balance command will receive receivable funds automatically.
 $ pass nano | atto balance
 Creating receive block for 1.025 from nano_34ymtnmhwseiex4eqf7nnf5wcyg44kknuuen5wwurm18ma91msf6e1pqo8hx... done
 Creating receive block for 0.1 from nano_39nd8eksw1ia6aokn96z4uthocke47hfsx9gr31othm1nrfwnzmmaeehiccq... done
@@ -84,9 +84,9 @@ The send subcommand also expects manual confirmation of the transaction,
 unless the -y flag is given.
 
 The address subcommand displays addresses for a seed, the balance
-subcommand receives pending sends and shows the balance of an account,
-the representative subcommand changes the account's representative and
-the send subcommand sends funds to an address.
+subcommand receives receivable blocks and shows the balance of
+an account, the representative subcommand changes the account's
+representative and the send subcommand sends funds to an address.
 
 ACCOUNT_INDEX is an optional parameter, which must be a number between 0
 and 4,294,967,295. It allows you to use multiple accounts derived from
