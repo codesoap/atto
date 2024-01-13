@@ -67,7 +67,7 @@ Usage:
 	atto n[ew]
 	atto [-a ACCOUNT_INDEX] a[ddress]
 	atto [-a ACCOUNT_INDEX] b[alance]
-	atto [-a ACCOUNT_INDEX] r[epresentative] REPRESENTATIVE
+	atto [-a ACCOUNT_INDEX] r[epresentative] [NEW_REPRESENTATIVE]
 	atto [-a ACCOUNT_INDEX] [-y] s[end] AMOUNT RECEIVER
 
 If the -v flag is provided, atto will print its version number.
@@ -84,9 +84,11 @@ The send subcommand also expects manual confirmation of the transaction,
 unless the -y flag is given.
 
 The address subcommand displays addresses for a seed, the balance
-subcommand receives receivable blocks and shows the balance of
-an account, the representative subcommand changes the account's
-representative and the send subcommand sends funds to an address.
+subcommand receives receivable blocks and shows the balance of an
+account, the representative subcommand shows the current representative
+if NEW_REPRESENTATIVE is not given and changes the account's
+representative if it is given and the send subcommand sends funds to an
+address.
 
 ACCOUNT_INDEX is an optional parameter, which must be a number between 0
 and 4,294,967,295. It allows you to use multiple accounts derived from
