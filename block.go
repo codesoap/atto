@@ -90,18 +90,12 @@ func (b *Block) verifySignature(a Account) (err error) {
 // FetchWork uses the generate_work RPC on node to fetch and then set
 // the Work of b.
 func (b *Block) FetchWork(node string) error {
-	var hash string
-	if b.Previous == "0000000000000000000000000000000000000000000000000000000000000000" {
-		publicKey, err := getPublicKeyFromAddress(b.Account)
-		if err != nil {
-			return err
-		}
-		hash = fmt.Sprintf("%064X", bigIntToBytes(publicKey, 32))
-	} else {
-		hash = b.Previous
+	hash, err := b.workHash()
+	if err != nil {
+		return err
 	}
 
-	requestBody := fmt.Sprintf(`{"action":"work_generate", "hash":"%s"`, string(hash))
+	requestBody := fmt.Sprintf(`{"action":"work_generate", "hash":"%s"`, hash)
 	if b.SubType == SubTypeReceive {
 		// Receive blocks need less work, so lower the difficulty.
 		var receiveWorkThreshold uint64 = 0xfffffe0000000000
@@ -124,6 +118,17 @@ func (b *Block) FetchWork(node string) error {
 	}
 	b.Work = response.Work
 	return nil
+}
+
+func (b Block) workHash() (string, error) {
+	if b.Previous == "0000000000000000000000000000000000000000000000000000000000000000" {
+		publicKey, err := getPublicKeyFromAddress(b.Account)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%064X", bigIntToBytes(publicKey, 32)), nil
+	}
+	return b.Previous, nil
 }
 
 // Hash calculates the block's hash and returns it's string
