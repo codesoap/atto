@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/binary"
 
+	"github.com/klauspost/cpuid/v2"
 	"golang.org/x/crypto/blake2b"
 )
 
-const workerRoutines = 128
+// Using cpuid.CPU.LogicalCores seems to yield the best performance.
+var workerRoutines = cpuid.CPU.LogicalCores
 
 type workerResult struct {
-	hashNumber uint64
-	nonce      uint64
-	err        error
+	nonce uint64
+	err   error
 }
 
 func findNonce(workThreshold uint64, suffix []byte) (uint64, error) {
@@ -21,15 +22,11 @@ func findNonce(workThreshold uint64, suffix []byte) (uint64, error) {
 	results := make(chan workerResult)
 	ctx, cancel := context.WithCancel(context.Background())
 	for i := 0; i < workerRoutines; i++ {
-		go calculateHashes(suffix, uint64(i), results, ctx)
+		go calculateHashes(workThreshold, suffix, uint64(i), results, ctx)
 	}
-	for {
-		result := <-results
-		if result.err != nil || result.hashNumber >= workThreshold {
-			stopWorkers(results, cancel)
-			return result.nonce, result.err
-		}
-	}
+	result := <-results
+	stopWorkers(results, cancel)
+	return result.nonce, result.err
 }
 
 func stopWorkers(results chan workerResult, cancel context.CancelFunc) {
@@ -45,7 +42,7 @@ func stopWorkers(results chan workerResult, cancel context.CancelFunc) {
 	}
 }
 
-func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, ctx context.Context) {
+func calculateHashes(workThreshold uint64, suffix []byte, nonce uint64, results chan workerResult, ctx context.Context) {
 	nonceBytes := make([]byte, 8)
 	hasher, err := blake2b.New(8, nil)
 	if err != nil {
@@ -64,9 +61,9 @@ func calculateHashes(suffix []byte, nonce uint64, results chan workerResult, ctx
 				return
 			}
 			hashBytes := hasher.Sum(nil)
-			results <- workerResult{
-				hashNumber: binary.LittleEndian.Uint64(hashBytes),
-				nonce:      nonce,
+			hashNumber := binary.LittleEndian.Uint64(hashBytes)
+			if hashNumber >= workThreshold {
+				results <- workerResult{nonce: nonce}
 			}
 			hasher.Reset()
 			nonce += uint64(workerRoutines)
