@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"strings"
 
 	"golang.org/x/crypto/blake2b"
 )
@@ -121,7 +122,7 @@ func (b *Block) FetchWork(node string) error {
 }
 
 func (b Block) workHash() (string, error) {
-	if b.Previous == "0000000000000000000000000000000000000000000000000000000000000000" {
+	if b.Previous == strings.Repeat("0", 64) {
 		publicKey, err := getPublicKeyFromAddress(b.Account)
 		if err != nil {
 			return "", err
