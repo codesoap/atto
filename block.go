@@ -20,6 +20,12 @@ var ErrSignatureMissing = fmt.Errorf("signature is missing")
 // required for the attempted operation.
 var ErrWorkMissing = fmt.Errorf("work is missing")
 
+var (
+	// See https://docs.nano.org/integration-guides/work-generation/#difficulty-thresholds
+	defaultWorkThreshold uint64 = 0xfffffff800000000
+	receiveWorkThreshold uint64 = 0xfffffe0000000000
+)
+
 // BlockSubType represents the sub-type of a block.
 type BlockSubType int64
 
@@ -99,7 +105,6 @@ func (b *Block) FetchWork(node string) error {
 	requestBody := fmt.Sprintf(`{"action":"work_generate", "hash":"%s"`, hash)
 	if b.SubType == SubTypeReceive {
 		// Receive blocks need less work, so lower the difficulty.
-		var receiveWorkThreshold uint64 = 0xfffffe0000000000
 		requestBody += fmt.Sprintf(`, "difficulty":"%016x"`, receiveWorkThreshold)
 	}
 	requestBody += `}`
@@ -118,6 +123,30 @@ func (b *Block) FetchWork(node string) error {
 		return fmt.Errorf("could not get work for block: %s", response.Error)
 	}
 	b.Work = response.Work
+	return nil
+}
+
+// GenerateWork uses the CPU of the local computer to generate work and
+// then sets it as b.Work.
+func (b *Block) GenerateWork() error {
+	hashString, err := b.workHash()
+	if err != nil {
+		return err
+	}
+	hash, err := hex.DecodeString(hashString)
+	if err != nil {
+		return err
+	}
+	workThreshold := defaultWorkThreshold
+	if b.SubType == SubTypeReceive {
+		// Receive blocks need less work, so lower the difficulty.
+		workThreshold = receiveWorkThreshold
+	}
+	nonce, err := findNonce(workThreshold, hash)
+	if err != nil {
+		return err
+	}
+	b.Work = fmt.Sprintf("%016x", nonce)
 	return nil
 }
 
