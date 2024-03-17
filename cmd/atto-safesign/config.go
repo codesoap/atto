@@ -10,4 +10,15 @@ var (
 	// opening an accout, but can be changed afterwards. See e.g.
 	// https://nanolooker.com/representatives to find representatives.
 	defaultRepresentative = "nano_1jtx5p8141zjtukz4msp1x93st7nh475f74odj8673qqm96xczmtcnanos1o"
+
+	// workSource specifies where the work for block submission shall
+	// come from. These options are available:
+	// - workSourceLocal: The work is generated on the CPU of the
+	//   current computer.
+	// - workSourceNode: The work is fetched from the node using the
+	//   work_generate action. Make sure that your node supports it.
+	// - workSourceLocalFallback: It is attempted to fetch the work
+	//   from the node, but if this fails, it will be generated on
+	//   the CPU of the current computer.
+	workSource = workSourceLocalFallback
 )

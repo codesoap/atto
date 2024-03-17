@@ -57,6 +57,14 @@ Environment:
 	                          Authentication.
 `
 
+type workSourceType int
+
+const (
+	workSourceLocal workSourceType = iota
+	workSourceNode
+	workSourceLocalFallback
+)
+
 var accountIndexFlag uint
 var yFlag bool
 
@@ -153,7 +161,7 @@ func receive() error {
 		if err != nil {
 			return err
 		}
-		if err = block.FetchWork(node); err != nil {
+		if err = fillWork(&block, node); err != nil {
 			return err
 		}
 		blockJSON, err := json.Marshal(block)
@@ -186,7 +194,7 @@ func change() error {
 	if err != nil {
 		return err
 	}
-	if err = block.FetchWork(node); err != nil {
+	if err = fillWork(&block, node); err != nil {
 		return err
 	}
 	blockJSON, err := json.Marshal(block)
@@ -215,7 +223,7 @@ func send() error {
 	if err != nil {
 		return err
 	}
-	if err = block.FetchWork(node); err != nil {
+	if err = fillWork(&block, node); err != nil {
 		return err
 	}
 	blockJSON, err := json.Marshal(block)
