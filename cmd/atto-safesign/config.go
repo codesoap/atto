@@ -4,7 +4,7 @@ var (
 	// The node needs to support the work_generate action. See
 	// e.g. https://publicnodes.somenano.com to find public nodes
 	// or set up your own node.
-	node = "https://node.somenano.com/proxy"
+	node = "https://rainstorm.city/api"
 
 	// defaultRepresentative will be set as the representative when
 	// opening an accout, but can be changed afterwards. See e.g.
