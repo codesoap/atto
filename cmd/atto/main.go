@@ -69,7 +69,7 @@ func init() {
 	flag.BoolVar(&vFlag, "v", false, "")
 	flag.Parse()
 	if vFlag {
-		fmt.Println("1.5.0")
+		fmt.Println("1.6.0")
 		os.Exit(0)
 	}
 	if accountIndexFlag >= 1<<32 || flag.NArg() < 1 {
