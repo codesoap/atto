@@ -7,6 +7,8 @@ import (
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/codesoap/atto"
 )
 
 // getSeed returns the first line of the standard input.
@@ -60,4 +62,20 @@ func letUserVerifySend(amount, recipient string) (err error) {
 		}
 	}
 	return
+}
+
+func fillWork(block *atto.Block, node string) error {
+	switch workSource {
+	case workSourceLocal:
+		return block.GenerateWork()
+	case workSourceNode:
+		return block.FetchWork(node)
+	case workSourceLocalFallback:
+		if err := block.FetchWork(node); err != nil {
+			fmt.Fprintf(os.Stderr, "Could not fetch work from node (error: %v); generating it on CPU... ", err)
+			return block.GenerateWork()
+		}
+		return nil
+	}
+	return fmt.Errorf("unknown work source")
 }
