@@ -118,7 +118,7 @@ cannot manipulate atto by, for example, reporting wrong balances.
 atto does not have any persistance and writes nothing to your
 file system. This makes atto very portable, but also means, that
 no history is stored locally. I recommend using a service like
-https://nanolooker.com/ to investigate transaction history.
+https://blocklattice.io/ to investigate transaction history.
 
 # Donations
 If you want to show your appreciation for atto, you can donate to me at
